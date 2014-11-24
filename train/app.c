@@ -63,4 +63,4 @@ END:
 
 
 
-// gcc -DDEBUG utils.c list.c train.c app.c -o app && ./app
+// gcc -DDEBUG utils.c list.c train.c app.c -o app.out && ./app.out

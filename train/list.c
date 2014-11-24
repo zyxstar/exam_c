@@ -39,7 +39,7 @@ void* list_add_elem(LIST *list, void *data){
 }
 
 
-void* list_add_elem_with_unique(LIST *list, void *data, BOOL(*cmp_fn)(void*, void*)){
+void* list_add_unique_elem(LIST *list, void *data, BOOL(*cmp_fn)(void*, void*)){
     int i;
     void *exist_data;
     for(i = 0; i < list->used_len; i++){
@@ -56,18 +56,18 @@ void* list_get_elem_by_idx(LIST *list, int idx){
     return ret;
 }
 
-int list_find_idx(LIST *list, void *cmp_data, BOOL(*predicate_fn)(void*, void*)){
+int list_find_idx(LIST *list, int start, void *extra, BOOL(*cmp_fn)(void*, void*)){
     int i;
-    for(i = 0; i < list->used_len; i++)
-        if(predicate_fn(list_get_elem_by_idx(list, i), cmp_data))
+    for(i = start; i < list->used_len; i++)
+        if(cmp_fn(list_get_elem_by_idx(list, i), extra))
             return i;
     return -1;
 }
 
-void list_each_elem_do(LIST *list, void(*do_fn)(void*, int)){
+void list_each_elem_do(LIST *list, void *extra, void(*do_fn)(void*, int, void*)){
     int i;
     for(i = 0; i < list->used_len; i++)
-        do_fn(list_get_elem_by_idx(list, i), i);
+        do_fn(list_get_elem_by_idx(list, i), i, extra);
 }
 
 void list_free(LIST *list){

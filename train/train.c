@@ -162,9 +162,7 @@ void find_train_by_station(LIST *trains, char *start_station, char *end_station,
     char *choice_stations[] = {strdup(start_station), strdup(end_station)};
     int idx = -1;
     TRAIN *train;
-    while(1){
-        idx = list_find_idx(trains, idx+1, choice_stations, _choice_train);
-        if(idx == -1) break;
+    while((idx = list_find_idx(trains, idx+1, choice_stations, _choice_train)) != -1){
         train = (TRAIN*)list_get_elem_by_idx(trains, idx);
         process(train, start_station, end_station);
     }

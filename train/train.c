@@ -138,7 +138,7 @@ void list_trains(LIST *trains){
 }
 
 void list_train(TRAIN *train){
-    printf("train_no: %-10s stations: %d\n", train->no, train->stations->used_len);
+    printf(" train_no: %-10s stations: %d\n", train->no, train->stations->used_len);
     list_each_elem_do(train->stations, NULL, _print_station);
 }
 

@@ -1,3 +1,6 @@
+#ifndef LIST_H_INCLUEDE
+#define LIST_H_INCLUEDE
+
 #include "utils.h"
 
 typedef struct{
@@ -16,3 +19,5 @@ int list_find_idx(LIST *list, int start_idx, void *extra, BOOL(*cmp_fn)(void* ex
 
 void list_each_elem_do(LIST *list, void *extra, void(*do_fn)(void* data, int idx, void* extra));
 void list_free(LIST *list);
+
+#endif /*LIST_H_INCLUEDE*/

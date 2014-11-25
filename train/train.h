@@ -30,7 +30,7 @@ STATION* find_station_by_name(TRAIN *train, char *name);
 void list_trains(LIST *trains);
 void list_train(TRAIN *train);
 void list_choice_train(TRAIN *train, char *start_station, char *end_station);
-void find_train_by_station(LIST *trains, char *start_station, char *end_station, void(*process)(TRAIN*, char*, char*));
+void find_trains_by_station(LIST *trains, char *start_station, char *end_station, void(*process)(TRAIN*, char*, char*));
 
 void destroy_trains(LIST *trains);
 

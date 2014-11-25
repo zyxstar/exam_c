@@ -46,7 +46,7 @@ void test_2(){
     printf("add_train: %p\n", train);
 
     printf("add_station: %s\n", human_bool(add_station(train, "BJ", 0.0)));
-    printf("add_station: %s\n", human_bool(add_station(train, "TJ", 20.0)));    
+    printf("add_station: %s\n", human_bool(add_station(train, "TJ", 20.0)));
     printf("add_station: %s\n", human_bool(add_station(train, "HB", 30.0)));
     printf("add_station: %s\n", human_bool(add_station(train, "SH", 60.0)));
     printf("add_station: %s\n", human_bool(add_station(train, "WH", 50.0)));
@@ -58,11 +58,11 @@ void test_2(){
     printf("add_train: %p\n", train);
     list_train(train);
 
-    printf("TJ-SH: \n");    
-    find_train_by_station(&train_list, "TJ", "SH", list_choice_train);
+    printf("TJ-SH: \n");
+    find_trains_by_station(&train_list, "TJ", "SH", list_choice_train);
 
-    printf("HB-WH: \n");    
-    find_train_by_station(&train_list, "HB", "WH", list_choice_train);
+    printf("HB-WH: \n");
+    find_trains_by_station(&train_list, "HB", "WH", list_choice_train);
 
     destroy_trains(&train_list);
 }

@@ -56,9 +56,9 @@ void* list_get_elem_by_idx(LIST *list, int idx){
     return ret;
 }
 
-int list_find_idx(LIST *list, int start, void *extra, BOOL(*cmp_fn)(void*, void*)){
+int list_find_idx(LIST *list, int start_idx, void *extra, BOOL(*cmp_fn)(void*, void*)){
     int i;
-    for(i = start; i < list->used_len; i++)
+    for(i = start_idx; i < list->used_len; i++)
         if(cmp_fn(list_get_elem_by_idx(list, i), extra))
             return i;
     return -1;

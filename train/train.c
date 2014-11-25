@@ -91,7 +91,7 @@ static void _print_train(void *data, int idx, void *extra){
 
 static void _print_station(void *data, int idx, void *extra){
     STATION *s = (STATION*)data;
-    printf("    [%2d] station: %-10s price: %.2f\n", idx, s->name, s->price);    
+    printf("    [%2d] station: %-10s price: %.2f\n", idx, s->name, s->price);
 }
 
 TRAIN* add_train(LIST *trains, char *no){
@@ -143,22 +143,21 @@ void list_train(TRAIN *train){
 }
 
 void list_choice_train(TRAIN *train, char *start_station, char *end_station){
-    STATION s;
-    strcpy(s.name, start_station);
-    int idx1 = list_find_idx(train->stations, 0, &s, _cmp_station);
-    STATION *s1 = (STATION*)list_get_elem_by_idx(train->stations, idx1);
-    strcpy(s.name, end_station);    
-    int idx2 = list_find_idx(train->stations, 0, &s, _cmp_station);
-    STATION *s2 = (STATION*)list_get_elem_by_idx(train->stations, idx2);
-
+    STATION *s1 = find_station_by_name(train, start_station);
+    STATION *s2 = find_station_by_name(train, end_station);
     printf("begin: %-10s end: %-10s ticket_price: %.2f\n", start_station, end_station, s2->price - s1->price);
     printf(" train_no: %-10s stations: %d\n", train->no, train->stations->used_len);
 
+    STATION s;
+    strcpy(s.name, start_station);
+    int idx1 = list_find_idx(train->stations, 0, &s, _cmp_station);
+    strcpy(s.name, end_station);
+    int idx2 = list_find_idx(train->stations, 0, &s, _cmp_station);
     for(; idx1 <= idx2; idx1++)
         _print_station(list_get_elem_by_idx(train->stations, idx1), idx1, NULL);
 }
 
-void find_train_by_station(LIST *trains, char *start_station, char *end_station, void(*process)(TRAIN*, char*, char*)){
+void find_trains_by_station(LIST *trains, char *start_station, char *end_station, void(*process)(TRAIN*, char*, char*)){
     char *choice_stations[] = {strdup(start_station), strdup(end_station)};
     int idx = -1;
     TRAIN *train;

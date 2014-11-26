@@ -101,7 +101,7 @@ void query_stations_ui(MENU *cur, void *env){
     printf("enter end station name:\n");
     scanf("%s", end);
     int count = find_trains_by_station(train_list, begin, end, list_choice_train);
-    printf("result count is %d:\n", count);
+    printf("result count is %d\n", count);
 }
 
 

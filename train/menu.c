@@ -34,7 +34,7 @@ static MENU* _get_menu_by_id(MENU *menu, int id){
 static void _destroy_menu(void *data){
     MENU* menu = (MENU*)data;
     int id = menu->id;
-    DEBUG_WRITE(("  # _destroy_menu begin: [id]%d, [text]%s, [sub_menus]%p\n",
+    DEBUG_WRITE(("_destroy_menu begin: [id]%d, [text]%s, [sub_menus]%p\n",
         id, menu->text, menu->sub_menus));
     free(menu->text);
 
@@ -42,7 +42,7 @@ static void _destroy_menu(void *data){
         list_free(menu->sub_menus);
         free(menu->sub_menus);
     }
-    DEBUG_WRITE(("  # _destroy_menu end: [id]%d\n", id));
+    DEBUG_WRITE(("_destroy_menu end: [id]%d\n", id));
 }
 
 void insert_menu(MENU *root, int id, int par_id, int op, char *text,
@@ -71,22 +71,22 @@ void insert_menu(MENU *root, int id, int par_id, int op, char *text,
 
 static void _show_menu_item_fn(void* data, int idx, void* extra){
     MENU *m = (MENU*)data;
-    printf("  -> [%2d] %s\n", m->op, m->text);
+    printf_info("   "DARY_GRAY"[%2d]"BROWN" %s\n", m->op, m->text);
 }
 
 static void _show_sub_menu(MENU *m){
     if(m->sub_menus == NULL){
-        printf("  -> empty yet!\n");
+        printf_info("   empty yet!\n");
         return;
     }
     list_each_elem_do(m->sub_menus, NULL, _show_menu_item_fn);
 }
 
 static void _show_cur_menu(MENU *cur_menu){
-    printf("-> %s\n", cur_menu->text);
+    printf_info(DARY_GRAY"-> [%s]\n"COLOR_NONE, cur_menu->text);
     _show_sub_menu(cur_menu);
-    printf("  -> [ 0] back\n");
-    printf("  -> [-1] quit\n");
+    printf_info("   "DARY_GRAY"[ 0]"BROWN" back\n");
+    printf_info("   "DARY_GRAY"[-1]"BROWN" quit\n");
 }
 
 
@@ -129,13 +129,13 @@ void show_menu(MENU *root, void *env){
             if(cur_menu->call_fn == NULL)
                 continue;
             else{
-                printf("swich to [%s]\n", cur_menu->text);
+                printf(DARY_GRAY"-> [%s]\n"COLOR_NONE, cur_menu->text);
                 cur_menu->call_fn(cur_menu, env);
                 _back_menu(root, &cur_menu);
             }
         }
         else
-            printf("-> error code, choice again:\n");
+            printf_error("-> error code, choice again:\n");
 
     }
 }

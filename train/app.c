@@ -10,27 +10,27 @@
 void register_user_ui(MENU *cur, void *env){
     LIST *user_list = (LIST*)((void**)env)[0];
     char name[10], passwd[10];
-    printf("username: ");
+    printf("enter username: ");
     scanf("%s", name);
-    printf("password: ");
+    printf("enter password: ");
     scanf("%s", passwd);
     if(register_user(user_list,name,passwd))
-        printf("resigter successful\n");
+        printf_correct("resigter successful\n");
     else
-        printf("resigter failed: user exist\n");
+        printf_error("resigter failed: user exist\n");
 }
 
 void validate_user_ui(MENU *cur, void *env){
     LIST *user_list = (LIST*)((void**)env)[0];
     char name[10], passwd[10];
-    printf("username: ");
+    printf("enter username: ");
     scanf("%s", name);
-    printf("password: ");
+    printf("enter password: ");
     scanf("%s", passwd);
     if(validate_user(user_list,name,passwd))
-        printf("login successful\n");
+        printf_correct("login successful\n");
     else
-        printf("login failed\n");
+        printf_error("login failed\n");
 }
 
 void list_users_ui(MENU *cur, void *env){
@@ -41,12 +41,12 @@ void list_users_ui(MENU *cur, void *env){
 void add_train_ui(MENU *cur, void *env){
     LIST *train_list = (LIST*)((void**)env)[1];
     char no[10];
-    printf("train no: ");
+    printf("enter train no: ");
     scanf("%s", no);
     if(add_train(train_list,no)!=NULL)
-        printf("add train successful\n");
+        printf_correct("add train successful\n");
     else
-        printf("add train failed: train exist\n");
+        printf_error("add train failed: train exist\n");
 
 }
 
@@ -54,24 +54,24 @@ void add_stations_ui(MENU *cur, void *env){
     LIST *train_list = (LIST*)((void**)env)[1];
     char no[10], name[10];
     float price;
-    printf("enter train no:\n");
+    printf("enter train no: ");
     scanf("%s", no);
     TRAIN *train = find_train_by_no(train_list, no);
     if(train == NULL){
-        printf("wrong train no\n");
+        printf_error("wrong train no\n");
         return;
     }
     while(1){
-        printf("enter station name:\n");
+        printf("enter station name(enter \"EOF\" if finished): ");
         scanf("%s", name);
         if(strcmp(name, "EOF") == 0) break;
 
-        printf("enter station price:\n");
+        printf("enter station price: ");
         scanf("%f", &price);
         if(add_station(train, name, price))
-            printf("add station successful\n");
+            printf_correct("add station successful\n");
         else
-            printf("add station failed: station exist\n");
+            printf_error("add station failed: station exist\n");
     }
 }
 
@@ -83,11 +83,11 @@ void list_all_trains_ui(MENU *cur, void *env){
 void query_train_no_ui(MENU *cur, void *env){
     LIST *train_list = (LIST*)((void**)env)[1];
     char no[10];
-    printf("enter train no:\n");
+    printf("enter train no: ");
     scanf("%s", no);
     TRAIN *train = find_train_by_no(train_list, no);
     if(train == NULL){
-        printf("wrong train no\n");
+        printf_error("wrong train no\n");
         return;
     }
     list_train(train);
@@ -96,12 +96,12 @@ void query_train_no_ui(MENU *cur, void *env){
 void query_stations_ui(MENU *cur, void *env){
     LIST *train_list = (LIST*)((void**)env)[1];
     char begin[10], end[10];
-    printf("enter begin station name:\n");
+    printf("enter begin station name: ");
     scanf("%s", begin);
-    printf("enter end station name:\n");
+    printf("enter end station name: ");
     scanf("%s", end);
     int count = find_trains_by_station(train_list, begin, end, list_choice_train);
-    printf("result count is %d\n", count);
+    printf("results count: %d\n", count);
 }
 
 

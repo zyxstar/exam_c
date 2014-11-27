@@ -85,3 +85,48 @@ void list_free(LIST *list){
 }
 
 
+////////////////////////////////
+void stack_new(STACK *stack, int elem_size, void(*free_fn)(void*)){
+    list_new((LIST*)stack, elem_size, free_fn);
+}
+
+void stack_free(STACK *stack){
+    list_free((LIST*)stack);
+}
+
+void* stack_push(STACK *stack, void *data){
+    return list_add_elem((LIST*)stack, data);
+}
+
+void stack_pop(STACK *stack, void *data){
+    DEBUG_WRITE(("stack_pop begin: [used_len]%d\n", stack->used_len));
+    assert(stack->used_len > 0);
+
+    stack->used_len--;
+    void *source = (char*)stack->header + stack->used_len * stack->elem_size;
+    memcpy(data, source, stack->elem_size);
+    DEBUG_WRITE(("stack_pop end: [used_len]%d\n", stack->used_len));
+}
+
+// void string_free_fn(void* elemAddr) {
+//     char** p = (char**)elemAddr;
+//     free(*p);
+// }
+
+// void test_stack(){
+//     const char friends[][5] = {"Al", "Bob", "Carl"};
+//     STACK string_stack;
+//     int i;
+//     stack_new(&string_stack, sizeof(char*), string_free_fn);
+//     for(i = 0; i < 3; i++) {
+//         char *copy = strdup(friends[i]);
+//         stack_push(&string_stack, &copy);
+//     }
+//     char* name;
+//     while(string_stack.used_len > 0) {
+//         stack_pop(&string_stack, &name);
+//         printf("%s\n", name);
+//         free(name);
+//     }
+//     stack_free(&string_stack);
+// }

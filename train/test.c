@@ -6,7 +6,6 @@
 #include "user.h"
 #include "train.h"
 
-
 void test_user(){
     LIST *user_list = init_users();
     printf("reg: %s\n", human_bool(register_user(user_list,"abc","123")));
@@ -72,7 +71,6 @@ void test_train(){
 int main(){
     test_user();
     test_train();
-
 
     return 0;
 }

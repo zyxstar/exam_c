@@ -2,24 +2,24 @@
 #define CONSOLE_H_INCLUEDE
 
 
-#define COLOR_NONE       "\033[0m"  
+#define COLOR_NONE       "\033[0m"
 #define BLACK            "\033[0;30m"
-#define DARY_GRAY        "\033[1;30m"     
-#define RED              "\033[0;32;31m"     
-#define LIGHT_RED        "\033[1;31m"     
-#define GREEN            "\033[0;32;32m"     
-#define LIGHT_GREEN      "\033[1;32m"     
-#define BROWN            "\033[0;33m"     
-#define YELLOW           "\033[1;33m"     
-#define BLUE             "\033[0;32;34m"     
-#define LIGHT_BLUE       "\033[1;34m"     
-#define PURPLE           "\033[0;35m"     
-#define LIGHT_PURPLE     "\033[1;35m"     
-#define CYAN             "\033[0;36m"     
-#define LIGHT_CYAN       "\033[1;36m"     
-#define LIGHT_GRAY       "\033[0;37m"     
-#define WHITE            "\033[1;37m"   
-   
+#define DARY_GRAY        "\033[1;30m"
+#define RED              "\033[0;32;31m"
+#define LIGHT_RED        "\033[1;31m"
+#define GREEN            "\033[0;32;32m"
+#define LIGHT_GREEN      "\033[1;32m"
+#define BROWN            "\033[0;33m"
+#define YELLOW           "\033[1;33m"
+#define BLUE             "\033[0;32;34m"
+#define LIGHT_BLUE       "\033[1;34m"
+#define PURPLE           "\033[0;35m"
+#define LIGHT_PURPLE     "\033[1;35m"
+#define CYAN             "\033[0;36m"
+#define LIGHT_CYAN       "\033[1;36m"
+#define LIGHT_GRAY       "\033[0;37m"
+#define WHITE            "\033[1;37m"
+
 #define BG_BLACK         "\033[40m"
 #define BG_RED           "\033[41m"
 #define BG_GREEN         "\033[42m"
@@ -31,8 +31,8 @@
 #define BG_NONE          "\033[49m"
 
 
-// printf("\033[1m\033[40;34mhello,world\033[0m\n" );    
-// printf(RED"RED FONT" BLUE "%s\n" NONE, "BLUE FONT" );    
+// printf("\033[1m\033[40;34mhello,world\033[0m\n" );
+// printf(RED"RED FONT" BLUE "%s\n" NONE, "BLUE FONT" );
 // 其中：
 
 // /033[1m 设置高亮度

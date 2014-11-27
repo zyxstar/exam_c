@@ -12,9 +12,9 @@ typedef struct MENU_TAG{
 } MENU;
 
 MENU* init_menu();
+void destroy_menu(MENU* root);
 
 void insert_menu(MENU *root, int id, int par_id, int op, char *text, void(*call_fn)(MENU *cur, void *env));
 
 void show_menu(MENU *root, void *env);
 
-void destroy_menu(MENU* root);

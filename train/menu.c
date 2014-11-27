@@ -114,10 +114,13 @@ static void _back_menu(MENU *root, MENU **cur_menu){
 void show_menu(MENU *root, void *env){
     MENU *cur_menu = root;
     int op;
+    char buf[256];
     while(1){
         _show_cur_menu(cur_menu);
 
-        scanf("%d", &op);
+        fgets(buf, sizeof(buf), stdin);
+        sscanf(buf, "%d", &op);
+
         if(op == -1) break;
         if(op == 0) {
             _back_menu(root, &cur_menu);

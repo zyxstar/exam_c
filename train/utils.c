@@ -12,12 +12,11 @@ void debug_write(char *format, ...){
     va_end(ap);
 }
 
-
 void printf_correct(char *format, ...){
     va_list ap;
     va_start(ap, format);
     char new_format[1024];
-    sprintf(new_format, LIGHT_GREEN "%s" COLOR_NONE, format);
+    sprintf(new_format, GREEN "%s" COLOR_NONE, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }
@@ -26,7 +25,7 @@ void printf_error(char *format, ...){
     va_list ap;
     va_start(ap, format);
     char new_format[1024];
-    sprintf(new_format, LIGHT_RED "%s" COLOR_NONE, format);
+    sprintf(new_format, RED "%s" COLOR_NONE, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }

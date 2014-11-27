@@ -3,63 +3,7 @@
 #include <string.h>
 #include "train.h"
 
-static void _destroy_user(void *data){
-    USER *u = (USER*)data;
-    DEBUG_WRITE(("  # _destroy_user: [name]%s, [passwd]%s\n",
-        u->name, u->passwd));
-    free(u->name);
-    free(u->passwd);
-}
 
-LIST* init_users(){
-    LIST *users = malloc(sizeof(LIST));
-    list_new(users, sizeof(USER), _destroy_user);//need free
-    return users;
-}
-
-static BOOL _cmp_user_name(void *exist, void *data){
-    USER *e = (USER*)exist;
-    USER *d = (USER*)data;
-    return strcmp(e->name, d->name) == 0;
-}
-
-BOOL register_user(LIST *users, char *name, char *passwd){
-    USER nu;
-    nu.name = strdup(name);
-    nu.passwd = strdup(passwd);
-    return list_add_unique_elem(users, &nu, _cmp_user_name) != NULL;
-}
-
-static BOOL _cmp_user(void *exist, void *data){
-    USER *e = (USER*)exist;
-    USER *d = (USER*)data;
-    return strcmp(e->name, d->name) == 0 && strcmp(e->passwd, d->passwd) == 0;
-}
-
-USER* validate_user(LIST *users, char *name, char *passwd){
-    USER nu;
-    nu.name = strdup(name);
-    nu.passwd = strdup(passwd);
-    int idx = list_find_idx(users, 0, &nu, _cmp_user);
-    if(idx == -1) return NULL;
-    return (USER*)list_get_elem_by_idx(users, idx);
-}
-
-static void _print_user(void *data, int idx, void *extra){
-    USER *u = (USER*)data;
-    printf("[%2d] [name] %-10s [passwd] %-10s\n", idx, u->name, u->passwd);
-}
-
-void list_users(LIST *users){
-    list_each_elem_do(users, NULL, _print_user);
-}
-
-void destroy_users(LIST *users){
-    list_free(users);
-    free(users);
-}
-
-//////////////////////////////////////////////
 static void _destroy_train(void *data){
     TRAIN *train = (TRAIN*)data;
     DEBUG_WRITE(("  # _destroy_train: [no]%s, [stations]%p, [size]%d\n",
@@ -72,6 +16,11 @@ LIST* init_trains(){
     LIST *trains = malloc(sizeof(LIST));
     list_new(trains, sizeof(TRAIN), _destroy_train); //need free
     return trains;
+}
+
+void destroy_trains(LIST *trains){
+    list_free(trains);
+    free(trains);
 }
 
 static BOOL _cmp_train(void *exist, void *data){
@@ -126,6 +75,28 @@ static void _print_train(void *data, int idx, void *extra){
     list_train(t);
 }
 
+static BOOL _choice_train(void *exist, void *extra){
+    TRAIN *train = (TRAIN*)exist;
+    char **choice_stations = (char**)extra;
+    return find_station_by_name(train, choice_stations[0]) != NULL &&
+        find_station_by_name(train, choice_stations[1]) != NULL;
+}
+
+int find_trains_by_station(LIST *trains, char *start_station, char *end_station, void(*process)(TRAIN*, char*, char*)){
+    char *choice_stations[] = {strdup(start_station), strdup(end_station)};
+    int idx = -1, count = 0;
+    TRAIN *train;
+    while((idx = list_find_idx(trains, idx+1, choice_stations, _choice_train)) != -1){
+        count++;
+        train = (TRAIN*)list_get_elem_by_idx(trains, idx);
+        process(train, start_station, end_station);
+    }
+
+    free(choice_stations[0]);
+    free(choice_stations[1]);
+    return count;
+}
+
 void list_trains(LIST *trains){
     list_each_elem_do(trains, NULL, _print_train);
 }
@@ -155,30 +126,3 @@ void list_choice_train(TRAIN *train, char *start_station, char *end_station){
         _print_station(list_get_elem_by_idx(train->stations, idx1), idx1, NULL);
 }
 
-static BOOL _choice_train(void *exist, void *extra){
-    TRAIN *train = (TRAIN*)exist;
-    char **choice_stations = (char**)extra;
-    return find_station_by_name(train, choice_stations[0]) != NULL &&
-        find_station_by_name(train, choice_stations[1]) != NULL;
-}
-
-int find_trains_by_station(LIST *trains, char *start_station, char *end_station, void(*process)(TRAIN*, char*, char*)){
-    char *choice_stations[] = {strdup(start_station), strdup(end_station)};
-    int idx = -1, count = 0;
-    TRAIN *train;
-    while((idx = list_find_idx(trains, idx+1, choice_stations, _choice_train)) != -1){
-        count++;
-        train = (TRAIN*)list_get_elem_by_idx(trains, idx);
-        process(train, start_station, end_station);
-    }
-
-    free(choice_stations[0]);
-    free(choice_stations[1]);
-    return count;
-}
-
-
-void destroy_trains(LIST *trains){
-    list_free(trains);
-    free(trains);
-}

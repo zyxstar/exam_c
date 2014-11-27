@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "train.h"
+#include "utils.h"
 #include "list.h"
+#include "user.h"
+#include "train.h"
 #include "menu.h"
 
 
@@ -27,7 +29,7 @@ void validate_user_ui(MENU *cur, void *env){
     scanf("%s", name);
     printf("enter password: ");
     scanf("%s", passwd);
-    if(validate_user(user_list,name,passwd))
+    if(validate_user(user_list,name,passwd) != NULL)
         printf_correct("login successful\n");
     else
         printf_error("login failed\n");
@@ -123,6 +125,8 @@ void prepare_menus(MENU *menus){
       insert_menu(menus, 33, 3, 33, "query by stations", query_stations_ui);
 
     insert_menu(menus, 4, 0, 4, "manage tickets", NULL);
+      insert_menu(menus, 41, 4, 41, "query tickets", NULL);
+
 }
 
 
@@ -146,5 +150,5 @@ int main(){
 
 
 
-// gcc utils.c list.c train.c menu.c app.c -o app.out -DDEBUG && ./app.out
-// gcc utils.c list.c train.c menu.c app.c -o app.out && ./app.out
+// gcc utils.c list.c user.c train.c menu.c app.c -o app.out -DDEBUG && ./app.out
+// gcc utils.c list.c user.c train.c menu.c app.c -o app.out && ./app.out

@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include "list.h"
+#include "user.h"
 #include "train.h"
 
 
-
-void test_1(){
+void test_user(){
     LIST *user_list = init_users();
     printf("reg: %s\n", human_bool(register_user(user_list,"abc","123")));
     printf("reg: %s\n", human_bool(register_user(user_list,"def","123")));
@@ -20,7 +21,7 @@ void test_1(){
     destroy_users(user_list);
 }
 
-void test_2(){
+void test_train(){
     LIST *train_list = init_trains();
     TRAIN *train = NULL;
 
@@ -69,12 +70,12 @@ void test_2(){
 
 
 int main(){
-    test_1();
-    test_2();
+    test_user();
+    test_train();
 
 
     return 0;
 }
 
-// gcc utils.c list.c train.c test.c -o test.out -DDEBUG && ./test.out
-// gcc utils.c list.c train.c test.c -o test.out && ./test.out
+// gcc utils.c list.c user.c train.c test.c -o test.out -DDEBUG && ./test.out
+// gcc utils.c list.c user.c train.c test.c -o test.out && ./test.out

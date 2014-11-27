@@ -110,12 +110,12 @@ void query_stations_ui(MENU *cur_menu, void *env){
 
 void book_ticket_ui(MENU *cur_menu, void *env){
     USER **cur_user = (USER**)((void**)env)[2];
-    *cur_user = validate_user(user_list,name,passwd);
     if(*cur_user == NULL){
         printf_error("current user is null, please login\n");
         return;
     }
-    printf_correct("current user is %s\n", *cur_user->name);
+    printf_correct("current user is %s\n", (*cur_user)->name);
+    printf("book ticket ...\n");
     // book ticket ...
 }
 
@@ -132,7 +132,7 @@ void prepare_menus(MENU *menus){
       insert_menu(menus, 32, 3, 32, "add stations", add_stations_ui);
       insert_menu(menus, 33, 3, 33, "list all trains", list_all_trains_ui);
 
-    insert_menu(menus, 4, 0, 4, "query trains", NULL);
+    insert_menu(menus, 4, 0, 4, "inquire trains", NULL);
       insert_menu(menus, 41, 4, 41, "query by train no", query_train_no_ui);
       insert_menu(menus, 42, 4, 42, "query by stations", query_stations_ui);
 
@@ -148,16 +148,16 @@ void prepare_menus(MENU *menus){
 int main(){
     LIST *user_list = init_users();
     LIST *train_list = init_trains();
-    MENU *root = init_menu();
+    MENU *menu_root = init_menu();
     USER *cur_user = NULL;
+    void *env[] = {user_list, train_list, &cur_user};
 
-    prepare_menus(root);
-    void *env[] = {user_list, train_list, cur_user};
-    show_menu(root, env);
+    prepare_menus(menu_root);
+    show_menu(menu_root, env);
 
     destroy_users(user_list);
     destroy_trains(train_list);
-    destroy_menu(root);
+    destroy_menu(menu_root);
 
     return 0;
 }

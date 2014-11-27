@@ -85,7 +85,8 @@ static void _show_sub_menu(MENU *m){
 static void _show_cur_menu(MENU *cur_menu){
     printf_info(DARY_GRAY"-> [%s]\n"COLOR_NONE, cur_menu->text);
     _show_sub_menu(cur_menu);
-    printf_info("   "DARY_GRAY"[ 0]"BROWN" back\n");
+    if(cur_menu->id != 0)
+        printf_info("   "DARY_GRAY"[ 0]"BROWN" back\n");
     printf_info("   "DARY_GRAY"[-1]"BROWN" quit\n");
 }
 
@@ -113,13 +114,16 @@ static void _back_menu(MENU *root, MENU **cur_menu){// must MENU**
 
 void show_menu(MENU *root, void *env){
     MENU *cur_menu = root;
-    int op;
-    char buf[256];
+    int op = -2;
+    // char buf[256];
     while(1){
         _show_cur_menu(cur_menu);
 
-        fgets(buf, sizeof(buf), stdin);
-        sscanf(buf, "%d", &op);
+        // fgets(buf, sizeof(buf), stdin);
+        // sscanf(buf, "%d", &op);
+        op = -2;
+        scanf("%d", &op);
+        getchar();
 
         if(op == -1) break;
         if(op == 0) {

@@ -76,7 +76,7 @@ static void _show_menu_item_fn(void* data, int idx, void* extra){
 
 static void _show_sub_menu(MENU *m){
     if(m->sub_menus == NULL){
-        printf_info("   empty yet!\n");
+        printf_info("   module still in development\n");
         return;
     }
     list_each_elem_do(m->sub_menus, NULL, _show_menu_item_fn);
@@ -96,7 +96,7 @@ static BOOL _cmp_menu_fn(void *exist, void *data){
     return ((MENU*)exist)->op == *((int*)data);
 }
 
-static BOOL _change_menu(MENU **cur_menu, int op){
+static BOOL _change_menu(MENU **cur_menu, int op){// must MENU**
     // printf("menu[%d]", op);
     if((*cur_menu)->sub_menus == NULL) return FALSE;
     int idx = list_find_idx((*cur_menu)->sub_menus, 0, &op, _cmp_menu_fn);
@@ -105,7 +105,7 @@ static BOOL _change_menu(MENU **cur_menu, int op){
     // printf("[%s]\n", (*cur_menu)->text);
 }
 
-static void _back_menu(MENU *root, MENU **cur_menu){
+static void _back_menu(MENU *root, MENU **cur_menu){// must MENU**
     int par_id = (*cur_menu)->par_id;
     if(par_id == -1) return;
     *cur_menu = (MENU*)_get_menu_by_id(root, par_id);

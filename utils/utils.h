@@ -50,33 +50,37 @@
 // 33[?25l 隐藏光标
 // 33[?25h 显示光标
 
-#define COLOR_NONE       "\033[0m"
-#define BLACK            "\033[0;30m"
-#define DARY_GRAY        "\033[1;30m"
-#define RED              "\033[0;32;31m"
-#define LIGHT_RED        "\033[1;31m"
-#define GREEN            "\033[0;32;32m"
-#define LIGHT_GREEN      "\033[1;32m"
-#define BROWN            "\033[0;33m"
-#define YELLOW           "\033[1;33m"
-#define BLUE             "\033[0;32;34m"
-#define LIGHT_BLUE       "\033[1;34m"
-#define PURPLE           "\033[0;35m"
-#define LIGHT_PURPLE     "\033[1;35m"
-#define CYAN             "\033[0;36m"
-#define LIGHT_CYAN       "\033[1;36m"
-#define LIGHT_GRAY       "\033[0;37m"
-#define WHITE            "\033[1;37m"
+#define VT_RESET                "\033[0m"
+#define VT_LIGHT                "\033[1m"
+#define VT_DEEP                 "\033[2m"
+#define VT_UNDTER               "\033[4m"
+#define VT_REVERSE              "\033[7m"
+#define VT_HIDE                 "\033[8m"
 
-#define BG_BLACK         "\033[40m"
-#define BG_RED           "\033[41m"
-#define BG_GREEN         "\033[42m"
-#define BG_YELLOW        "\033[43m"
-#define BG_BLUE          "\033[44m"
-#define BG_PURPLE        "\033[45m"
-#define BG_LIGHT_GREEN   "\033[46m"
-#define BG_WHITE         "\033[47m"
-#define BG_NONE          "\033[49m"
+
+#define VT_BLACK                "\033[30m"
+#define VT_RED                  "\033[31m"
+#define VT_GREEN                "\033[32m"
+#define VT_YELLOW               "\033[33m"
+#define VT_BLUE                 "\033[34m"
+#define VT_PURPLE               "\033[35m"
+#define VT_CYAN                 "\033[36m"
+#define VT_GRAY                 "\033[37m"
+#define VT_BLACK_LIGHT          "\033[1;38m"
+
+#define VT_BG_BLACK             "\033[40m"
+#define VT_BG_RED               "\033[41m"
+#define VT_BG_GREEN             "\033[42m"
+#define VT_BG_YELLOW            "\033[43m"
+#define VT_BG_BLUE              "\033[44m"
+#define VT_BG_PURPLE            "\033[45m"
+#define VT_BG_CYAN              "\033[46m"
+#define VT_BG_WHITE             "\033[47m"
+#define VT_BG_NONE              "\033[49m"
+
+#define VT_HIED_CUR             "\033[?25l"
+#define VT_SHOW_CUR             "\033[?25h"
+
 
 #ifdef DEBUG
 #define DEBUG_WRITE(arg) debug_write arg
@@ -104,5 +108,33 @@ typedef enum{
 } BOOL;
 
 const char* human_bool(BOOL val);
+
+
+
+
+
+struct{
+    int interval;
+    int const_interval;
+    char callee_name[256];
+    void(*callee_fn)();
+} GLOBAL_SIMPLE_TIMER;
+
+#define timer_new(arg1, arg2) \
+        _timer_set_callee_name(#arg2);\
+        _timer_set((arg1), (arg2)) \
+
+#define timer_interval() GLOBAL_SIMPLE_TIMER.interval
+#define timer_callee_name() GLOBAL_SIMPLE_TIMER.callee_name
+
+void _timer_set_callee_name(char *source);
+void _timer_set(int interval, void(*callee_fn)());
+
+void timer_start();
+void timer_stop();
+
+
+
+
 
 #endif /*CONSOLE_H_INCLUEDE*/

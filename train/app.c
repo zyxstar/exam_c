@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "utils.h"
 #include "list.h"
+#include "utils.h"
 #include "user.h"
 #include "train.h"
 #include "menu.h"
@@ -164,5 +164,5 @@ int main(){
 
 
 
-// gcc utils.c list.c user.c train.c menu.c app.c -o app.out -DDEBUG && ./app.out
-// gcc utils.c list.c user.c train.c menu.c app.c -o app.out && ./app.out
+// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c menu.c app.c -o app.out -DDEBUG && ./app.out
+// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c menu.c app.c -o app.out && ./app.out

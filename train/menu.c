@@ -71,7 +71,7 @@ void insert_menu(MENU *root, int id, int par_id, int op, char *text,
 
 static void _show_menu_item_fn(void* data, int idx, void* extra){
     MENU *m = (MENU*)data;
-    printf_info("   "DARY_GRAY"[%2d]"BROWN" %s\n", m->op, m->text);
+    printf_info("   "VT_LIGHT VT_BLACK"[%2d]"VT_RESET VT_YELLOW" %s\n", m->op, m->text);
 }
 
 static void _show_sub_menu(MENU *m){
@@ -83,11 +83,11 @@ static void _show_sub_menu(MENU *m){
 }
 
 static void _show_cur_menu(MENU *cur_menu){
-    printf_info(DARY_GRAY"-> [%s]\n"COLOR_NONE, cur_menu->text);
+    printf_info(VT_LIGHT VT_BLACK"-> [%s]\n"VT_RESET, cur_menu->text);
     _show_sub_menu(cur_menu);
     if(cur_menu->id != 0)
-        printf_info("   "DARY_GRAY"[ 0]"BROWN" back\n");
-    printf_info("   "DARY_GRAY"[-1]"BROWN" quit\n");
+        printf_info("   "VT_LIGHT VT_BLACK"[ 0]"VT_RESET VT_YELLOW" back\n");
+    printf_info("   "VT_LIGHT VT_BLACK"[-1]"VT_RESET VT_YELLOW" quit\n");
 }
 
 
@@ -136,7 +136,7 @@ void show_menu(MENU *root, void *env){
             if(cur_menu->call_fn == NULL)
                 continue;
             else{
-                printf(DARY_GRAY"-> [%s]\n"COLOR_NONE, cur_menu->text);
+                printf(VT_LIGHT VT_BLACK"-> [%s]\n"VT_RESET, cur_menu->text);
                 cur_menu->call_fn(cur_menu, env);
                 _back_menu(root, &cur_menu);
             }

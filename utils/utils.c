@@ -10,7 +10,7 @@ void debug_write(char *format, ...){
     va_list ap;
     va_start(ap, format);
     char new_format[1024];
-    sprintf(new_format, LIGHT_BLUE "#DEBUG# %s" COLOR_NONE, format);
+    sprintf(new_format, VT_RESET "\033[35m#DEBUG# %s" VT_RESET, format);
     vfprintf(stderr, new_format, ap);
     va_end(ap);
 }
@@ -19,7 +19,7 @@ void printf_correct(char *format, ...){
     va_list ap;
     va_start(ap, format);
     char new_format[1024];
-    sprintf(new_format, GREEN "%s" COLOR_NONE, format);
+    sprintf(new_format, VT_RESET VT_GREEN "%s" VT_RESET, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }
@@ -28,7 +28,7 @@ void printf_error(char *format, ...){
     va_list ap;
     va_start(ap, format);
     char new_format[1024];
-    sprintf(new_format, RED "%s" COLOR_NONE, format);
+    sprintf(new_format, VT_RESET VT_RED "%s" VT_RESET, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }
@@ -37,7 +37,7 @@ void printf_info(char *format, ...){
     va_list ap;
     va_start(ap, format);
     char new_format[1024];
-    sprintf(new_format, BROWN "%s" COLOR_NONE, format);
+    sprintf(new_format, VT_RESET VT_YELLOW "%s" VT_RESET, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }

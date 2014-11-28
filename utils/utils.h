@@ -53,7 +53,7 @@
 #define VT_RESET                "\033[0m"
 #define VT_LIGHT                "\033[1m"
 #define VT_DEEP                 "\033[2m"
-#define VT_UNDTER               "\033[4m"
+#define VT_UNDER                "\033[4m"
 #define VT_REVERSE              "\033[7m"
 #define VT_HIDE                 "\033[8m"
 
@@ -90,11 +90,11 @@
 
 void debug_write(char *format, ...);
 
-#define SNAP_INT(arg) fprintf(stderr, LIGHT_BLUE "[" #arg "] %d\n"COLOR_NONE, arg)
-#define SNAP_CHAR(arg) fprintf(stderr, LIGHT_BLUE "[" #arg "] %c\n"COLOR_NONE, arg)
-#define SNAP_FLOAT(arg) fprintf(stderr, LIGHT_BLUE "[" #arg "] %f\n"COLOR_NONE, arg)
-#define SNAP_STRING(arg) fprintf(stderr, LIGHT_BLUE "[" #arg "] %s\n"COLOR_NONE, arg)
-#define SNAP_POINTER(arg) fprintf(stderr, LIGHT_BLUE "[" #arg "] %p\n"COLOR_NONE, arg)
+#define SNAP_INT(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %d\n"VT_RESET, arg)
+#define SNAP_CHAR(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %c\n"VT_RESET, arg)
+#define SNAP_FLOAT(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %f\n"VT_RESET, arg)
+#define SNAP_STRING(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %s\n"VT_RESET, arg)
+#define SNAP_POINTER(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %p\n"VT_RESET, arg)
 
 
 void printf_correct(char *format, ...);

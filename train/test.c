@@ -75,5 +75,5 @@ int main(){
     return 0;
 }
 
-// gcc utils.c list.c user.c train.c test.c -o test.out -DDEBUG && ./test.out
-// gcc utils.c list.c user.c train.c test.c -o test.out && ./test.out
+// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c test.c -o test.out -DDEBUG && ./test.out
+// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c test.c -o test.out && ./test.out

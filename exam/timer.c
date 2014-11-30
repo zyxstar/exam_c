@@ -14,10 +14,6 @@ void handler2(){
 
 
 int main(){
-    // printf("%s\n", __FILE__);
-    // printf("%d\n", __LINE__);
-    // printf("%s\n", __FUNCTION__);
-    // printf("%s\n", __func__);
 
     timer_new(3, handler);
     timer_start();

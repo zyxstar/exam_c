@@ -59,8 +59,8 @@ static void _timer_wrap_callee_fn(){
     alarm(GLOBAL_SIMPLE_TIMER.interval);
 }
 
-void _timer_set_callee_name(char *source){
-    strcpy(GLOBAL_SIMPLE_TIMER.callee_name, source);
+void _timer_set_callee_name(char *file, int line, char *name){
+    sprintf(GLOBAL_SIMPLE_TIMER.callee_name, "%s:%d:%s", file, line, name);
 }
 
 void _timer_set(int interval, void(*callee_fn)()){

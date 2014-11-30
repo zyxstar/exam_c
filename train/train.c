@@ -6,7 +6,7 @@
 
 static void _destroy_train(void *data){
     TRAIN *train = (TRAIN*)data;
-    DEBUG_WRITE(("  # _destroy_train: [no]%s, [stations]%p, [size]%d\n",
+    DEBUG_WRITE(("_destroy_train: [no]%s, [stations]%p, [size]%d\n",
         train->no, train->stations, train->stations->used_len));
     list_free(train->stations);
     free(train->stations);

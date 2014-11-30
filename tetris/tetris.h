@@ -2,14 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "utils.h"
 
 #define ROWS 16
 #define COLS 10
-
-typedef enum{
-    FALSE,
-    TRUE
-} BOOL;
 
 typedef enum{
     EMPTY,
@@ -30,36 +26,33 @@ typedef struct{
 
 typedef struct{
     char type;
-    int turn_count;
+    int turn_idx;
     POS_SET pos_set;
+    POS_SET base_pos_sets[4];
 } BLOCK;
 
 typedef int (*PANEL)[COLS];
 
-typedef struct{
+typedef struct GAME_TAG{
     int score;
     PANEL panel;
     BLOCK cur_block;
     BLOCK next_block;
-    (void)(*draw_view)(GAME);
+    void(*draw_view)(struct GAME_TAG*);
 } GAME;
 
-// begin srand
+// interface
+GAME* init_game(void(*draw_view)(GAME*));
+BOOL move_left(GAME *game);
+BOOL move_right(GAME *game);
+BOOL move_down(GAME *game);
+BOOL turn(GAME *game); //means turn left
 
 
-void resiger_view((void)(*draw_view)(GAME));
-
-void begin_game(GAME *game);
-
-PANEL init_panel();
-BLOCK init_block(char type); //type in "TOILJSZ"
-
-
-BOOL move_left(PANEL panel, BLOCK *b);
-BOOL move_right(PANEL panel, BLOCK *b);
-BOOL move_down(PANEL panel, BLOCK *b);
-
-BOOL turn(PANEL panel, BLOCK *b); //turn left
-
-void print_panel(const PANEL panel);
-void print_block(const BLOCK *b);
+// for unit test
+PANEL _init_panel();
+BLOCK _init_block(char type, int turn_idx); //type in "TOILJSZ"
+BLOCK _rand_block();
+void _print_game(const GAME *game);
+void _print_panel(const PANEL panel);
+void _print_block(const BLOCK *b);

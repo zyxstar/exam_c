@@ -1,10 +1,6 @@
 #include "tetris.h"
-#include <unistd.h>
+#include "utils.h"
 
-const char* human_bool(BOOL val){
-    if(val) return "TRUE";
-    return "FALSE";
-}
 
 void each_type_do(void(*callback)(char type)){
     char *types = "TOILJSZ";
@@ -19,28 +15,32 @@ int GLOBAL_PANEL[ROWS][COLS] = {0};
 
 ////////////////////////////////////////
 void test_init_panel(){
-    PANEL panel = init_panel();
-    print_panel((const PANEL)panel);
+    PANEL panel = _init_panel();
+    _print_panel((const PANEL)panel);
     free(panel);
 }
 ////////////////////////////////////////
 void test_print_block_callback(char type){
-    BLOCK b = init_block(type);
-    print_block(&b);
+    BLOCK b;
+    int i;
+    for(i = 0; i < 4; i++) {
+        b = init_block(type, i);
+        _print_block(&b);
+    }
 }
 void test_print_block(){
     each_type_do(test_print_block_callback);
 }
 ////////////////////////////////////////
-void _test_move(char type, char *direction_str, BOOL(*func)(PANEL, BLOCK*) ,int times){
-    BLOCK b = init_block(type);
+void _test_move(char type, char *direction_str, BOOL(*func)(GAME*) ,int times){
+    BLOCK b = init_block(type,0);
     int i;
     BOOL ret;
     for(i = 1; i <= times; i++){
         ret = func((PANEL)GLOBAL_PANEL, &b);
         printf("%c: %s[%d]: %s\n",type, direction_str, i, human_bool(ret));
-        print_block(&b);
-        print_panel((PANEL)GLOBAL_PANEL);
+        _print_block(&b);
+        _print_panel((PANEL)GLOBAL_PANEL);
         if(!ret) break;
     }
 }
@@ -63,7 +63,7 @@ void test_move_with_filled(char type){
 
 ////////////////////////////////////////
 void test_turn_block(char type){
-    BLOCK b = init_block(type);
+    BLOCK b = init_block(type,0);
     PANEL panel = (PANEL)GLOBAL_PANEL;
     move_right(panel, &b);
     move_right(panel, &b);
@@ -72,19 +72,22 @@ void test_turn_block(char type){
     move_down(panel, &b);
     move_down(panel, &b);
 
-    print_block(&b);
+    _print_block(&b);
     int i;
     BOOL ret;
-    for(i = 0; i <= 6; i++){
+    for(i = 0; i < 4; i++){
         ret = turn(panel, &b);
         printf("%c: [%d]: %s\n",type, i, human_bool(ret));
-        print_block(&b);
-        print_panel(panel);
+        _print_block(&b);
+        _print_panel(panel);
         if(!ret) break;
     }
 }
 
-
+void test_turn_block_filled(char type){
+    GLOBAL_PANEL[5][4] = FILLED;
+    test_turn_block(type);
+}
 
 
 int main(int argc, const char* argv[]){
@@ -94,7 +97,8 @@ int main(int argc, const char* argv[]){
     // each_type_do(test_move_right);
     // each_type_do(test_move_down);
     // each_type_do(test_move_with_filled);
-    test_turn_block('T');
+
+    // test_turn_block('T');
     // test_turn_block('O');
     // test_turn_block('I');
     // test_turn_block('L');
@@ -102,10 +106,11 @@ int main(int argc, const char* argv[]){
     // test_turn_block('S');
     // test_turn_block('Z');
 
+    test_turn_block_filled('I');
 
 
 
     return 0;
 }
 
-// gcc test.c tetris.c -o test
+// gcc -I ../utils ../utils/utils.c test.c tetris.c -o test.out && ./test.out

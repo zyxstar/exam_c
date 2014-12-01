@@ -17,6 +17,17 @@ void test_user(){
     printf("login: %p\n", validate_user(user_list,"abc","123"));
     printf("login: %p\n", validate_user(user_list,"abc","124"));
 
+    FILE *fp = fopen("users.data", "wb");
+    save_users(user_list, fp);
+    fclose(fp);
+    destroy_users(user_list);
+}
+
+void test_load_users(){
+    FILE *fp = fopen("users.data", "rb");
+    LIST *user_list = load_users(fp);
+    list_users(user_list);
+    fclose(fp);
     destroy_users(user_list);
 }
 
@@ -64,14 +75,27 @@ void test_train(){
     printf("HB-WH: \n");
     find_trains_by_station(train_list, "HB", "WH", list_choice_train);
 
+
+    FILE *fp = fopen("trains.data", "wb");
+    save_trains(train_list, fp);
+    fclose(fp);
+
     destroy_trains(train_list);
 }
 
+void test_load_trains(){
+    FILE *fp = fopen("trains.data", "rb");
+    LIST *train_list = load_trains(fp);
+    list_trains(train_list);
+    fclose(fp);
+    destroy_trains(train_list);
+}
 
 int main(){
     test_user();
+    // test_load_users();
     test_train();
-
+    // test_load_trains();
     return 0;
 }
 

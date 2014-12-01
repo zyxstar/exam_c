@@ -25,5 +25,6 @@ void list_trains(LIST *trains);
 void list_train(TRAIN *train);
 void list_choice_train(TRAIN *train, char *start_station, char *end_station);
 
-
+void save_trains(LIST *trains, FILE* fp);
+LIST* load_trains(FILE* fp);
 

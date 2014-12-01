@@ -13,14 +13,13 @@ static void _list_grow(LIST *list){
     DEBUG_WRITE(("_list_grow end: [alloc_len]%d, [header]%p\n", list->alloc_len, list->header));
 }
 
-void list_new(LIST *list, int elem_size, void(*free_fn)(void*)){
+void list_new(LIST *list, int elem_size){
     DEBUG_WRITE(("list_new begin: [elem_size]%d\n", elem_size));
     assert(elem_size > 0);
     list->elem_size = elem_size;
     list->used_len = 0;
     list->alloc_len = INIT_ALLOC_LEN;
     list->header = malloc(INIT_ALLOC_LEN * elem_size);
-    list->free_fn = free_fn;
     assert(list->header != NULL);
     DEBUG_WRITE(("list_new end\n"));
 }
@@ -70,13 +69,13 @@ void list_each_elem_do(LIST *list, void *extra, void(*do_fn)(void*, int, void*))
         do_fn(list_get_elem_by_idx(list, i), i, extra);
 }
 
-void list_free(LIST *list){
+void list_free(LIST *list, void(*free_elem_fn)(void*)){
     DEBUG_WRITE(("list_free begin\n"));
     int i;
-    if(list->free_fn != NULL){
+    if(free_elem_fn != NULL){
         for(i = 0; i < list->used_len; i++){
             DEBUG_WRITE(("list_free_sub begin: [idx]%d\n", i));
-            list->free_fn((char*)list->header + i * list->elem_size);
+            free_elem_fn((char*)list->header + i * list->elem_size);
             DEBUG_WRITE(("list_free_sub end: [idx]%d\n", i));
         }
     }
@@ -84,14 +83,61 @@ void list_free(LIST *list){
     DEBUG_WRITE(("list_free end\n"));
 }
 
+void list_save(LIST *list, FILE *fp, void(*save_elem_fn)(void*, FILE*)){
+    assert(fp != NULL);
+    DEBUG_WRITE(("list_save begin\n"));
+    fwrite(list, sizeof(LIST), 1, fp); //LIST
+    int i;
+    void *elem;
+    for(i = 0; i<list->used_len; i++){
+        elem = list_get_elem_by_idx(list, i);
+        DEBUG_WRITE(("list_save_elem begin: [idx]%d\n", i));
+        fwrite(elem, list->elem_size, 1, fp);//elem
+        DEBUG_WRITE(("list_save_elem end: [idx]%d\n", i));
 
-////////////////////////////////
-void stack_new(STACK *stack, int elem_size, void(*free_fn)(void*)){
-    list_new((LIST*)stack, elem_size, free_fn);
+        if(save_elem_fn != NULL){
+            //if elem is a pointer
+            DEBUG_WRITE(("list_save_elem_ref begin: [idx]%d\n", i));
+            save_elem_fn(elem, fp);
+            DEBUG_WRITE(("list_save_elem_ref begin: [idx]%d\n", i));
+        }
+    }
+    DEBUG_WRITE(("list_save end\n"));
 }
 
-void stack_free(STACK *stack){
-    list_free((LIST*)stack);
+void list_load(LIST *list, FILE *fp, void(*load_elem_fn)(void*, FILE*)){
+    assert(fp != NULL);
+    DEBUG_WRITE(("list_load begin\n"));
+    fread(list, sizeof(LIST), 1, fp); //LIST
+    DEBUG_WRITE(("list_load [alloc_len]:%d, [used_len]:%d\n", list->alloc_len, list->used_len));
+    list->header = malloc(list->alloc_len * list->elem_size);
+
+    int i;
+    void *elem;
+    for(i = 0; i<list->used_len; i++){
+        elem = list_get_elem_by_idx(list, i);
+        DEBUG_WRITE(("list_load_elem begin: [idx]%d\n", i));
+        fread(elem, list->elem_size, 1, fp);//elem
+        DEBUG_WRITE(("list_load_elem end: [idx]%d\n", i));
+
+        if(load_elem_fn != NULL){
+            //if elem is a pointer
+            DEBUG_WRITE(("list_load_elem_ref begin: [idx]%d\n", i));
+            load_elem_fn(elem, fp);
+            DEBUG_WRITE(("list_load_elem_ref begin: [idx]%d\n", i));
+        }
+    }
+    DEBUG_WRITE(("list_load end\n"));
+}
+
+
+////////////////////////////////
+void stack_new(STACK *stack, int elem_size){
+    list_new((LIST*)stack, elem_size);
+}
+
+void stack_free(STACK *stack, void(*free_elem_fn)(void*)){
+    list_free((LIST*)stack, free_elem_fn);
 }
 
 void* stack_push(STACK *stack, void *data){
@@ -108,7 +154,7 @@ void stack_pop(STACK *stack, void *data){
     DEBUG_WRITE(("stack_pop end: [used_len]%d\n", stack->used_len));
 }
 
-// void string_free_fn(void* elemAddr) {
+// void string_free_elem_fn(void* elemAddr) {
 //     char** p = (char**)elemAddr;
 //     free(*p);
 // }
@@ -117,7 +163,7 @@ void stack_pop(STACK *stack, void *data){
 //     const char friends[][5] = {"Al", "Bob", "Carl"};
 //     STACK string_stack;
 //     int i;
-//     stack_new(&string_stack, sizeof(char*), string_free_fn);
+//     stack_new(&string_stack, sizeof(char*));
 //     for(i = 0; i < 3; i++) {
 //         char *copy = strdup(friends[i]);
 //         stack_push(&string_stack, &copy);
@@ -128,5 +174,5 @@ void stack_pop(STACK *stack, void *data){
 //         printf("%s\n", name);
 //         free(name);
 //     }
-//     stack_free(&string_stack);
+//     stack_free(&string_stack, string_free_elem_fn);
 // }

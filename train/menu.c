@@ -31,19 +31,7 @@ static MENU* _get_menu_by_id(MENU *menu, int id){
 
 //////////////////////////////////////////////
 
-static void _destroy_menu(void *data){
-    MENU* menu = (MENU*)data;
-    int id = menu->id;
-    DEBUG_WRITE(("_destroy_menu begin: [id]%d, [text]%s, [sub_menus]%p\n",
-        id, menu->text, menu->sub_menus));
-    free(menu->text);
 
-    if(menu->sub_menus != NULL){
-        list_free(menu->sub_menus);
-        free(menu->sub_menus);
-    }
-    DEBUG_WRITE(("_destroy_menu end: [id]%d\n", id));
-}
 
 void insert_menu(MENU *root, int id, int par_id, int op, char *text,
                  void(*call_fn)(MENU *cur, void *env)){
@@ -54,7 +42,7 @@ void insert_menu(MENU *root, int id, int par_id, int op, char *text,
 
     if(target->sub_menus == NULL){
         target->sub_menus = malloc(sizeof(LIST));
-        list_new(target->sub_menus, sizeof(MENU), _destroy_menu);
+        list_new(target->sub_menus, sizeof(MENU));
     }
     MENU m = {id, par_id, op, strdup(text), call_fn};
     list_add_elem(target->sub_menus, &m);
@@ -148,6 +136,20 @@ void show_menu(MENU *root, void *env){
 }
 
 //////////////////////////////////////////////
+
+static void _destroy_menu(void *data){
+    MENU* menu = (MENU*)data;
+    int id = menu->id;
+    DEBUG_WRITE(("_destroy_menu begin: [id]%d, [text]%s, [sub_menus]%p\n",
+        id, menu->text, menu->sub_menus));
+    free(menu->text);
+
+    if(menu->sub_menus != NULL){
+        list_free(menu->sub_menus, _destroy_menu);
+        free(menu->sub_menus);
+    }
+    DEBUG_WRITE(("_destroy_menu end: [id]%d\n", id));
+}
 
 void destroy_menu(MENU* root){
     _destroy_menu(root);

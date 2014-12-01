@@ -3,6 +3,12 @@
 #include <string.h>
 #include "user.h"
 
+LIST* init_users(){
+    LIST *users = malloc(sizeof(LIST));
+    list_new(users, sizeof(USER));
+    return users;
+}
+
 static void _destroy_user(void *data){
     USER *u = (USER*)data;
     DEBUG_WRITE(("_destroy_user: [name]%s, [passwd]%s\n",
@@ -11,14 +17,8 @@ static void _destroy_user(void *data){
     free(u->passwd);
 }
 
-LIST* init_users(){
-    LIST *users = malloc(sizeof(LIST));
-    list_new(users, sizeof(USER), _destroy_user);//need free
-    return users;
-}
-
 void destroy_users(LIST *users){
-    list_free(users);
+    list_free(users, _destroy_user);//need free
     free(users);
 }
 
@@ -59,4 +59,30 @@ void list_users(LIST *users){
     list_each_elem_do(users, NULL, _print_user);
 }
 
+static void _save_user(void *elem, FILE *fp){
+    USER *user = (USER*)elem;
+    char name[10], passwd[10];
+    strcpy(name, user->name);
+    strcpy(passwd, user->passwd);
+    fwrite(name, sizeof(char), 10, fp);
+    fwrite(passwd, sizeof(char), 10, fp);
+}
 
+void save_users(LIST *users, FILE* fp){
+    list_save(users, fp, _save_user);
+}
+
+static void _load_user(void *elem, FILE *fp){
+    char name[10], passwd[10];
+    fread(name, sizeof(char), 10, fp);
+    fread(passwd, sizeof(char), 10, fp);
+    USER *user = (USER*)elem;
+    user->name = strdup(name);
+    user->passwd = strdup(passwd);
+}
+
+LIST* load_users(FILE* fp){
+    LIST *users = malloc(sizeof(LIST));
+    list_load(users, fp, _load_user);
+    return users;
+}

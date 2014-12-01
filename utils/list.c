@@ -13,12 +13,13 @@ static void _list_grow(LIST *list){
     DEBUG_WRITE(("_list_grow end: [alloc_len]%d, [header]%p\n", list->alloc_len, list->header));
 }
 
-void list_new(LIST *list, int elem_size){
+void list_new(LIST *list, int elem_size, void(*free_elem_fn)(void*)){
     DEBUG_WRITE(("list_new begin: [elem_size]%d\n", elem_size));
     assert(elem_size > 0);
     list->elem_size = elem_size;
     list->used_len = 0;
     list->alloc_len = INIT_ALLOC_LEN;
+    list->free_elem_fn = free_elem_fn;
     list->header = malloc(INIT_ALLOC_LEN * elem_size);
     assert(list->header != NULL);
     DEBUG_WRITE(("list_new end\n"));
@@ -69,13 +70,13 @@ void list_each_elem_do(LIST *list, void *extra, void(*do_fn)(void*, int, void*))
         do_fn(list_get_elem_by_idx(list, i), i, extra);
 }
 
-void list_free(LIST *list, void(*free_elem_fn)(void*)){
+void list_free(LIST *list){
     DEBUG_WRITE(("list_free begin\n"));
     int i;
-    if(free_elem_fn != NULL){
+    if(list->free_elem_fn != NULL){
         for(i = 0; i < list->used_len; i++){
             DEBUG_WRITE(("list_free_sub begin: [idx]%d\n", i));
-            free_elem_fn((char*)list->header + i * list->elem_size);
+            list->free_elem_fn((char*)list->header + i * list->elem_size);
             DEBUG_WRITE(("list_free_sub end: [idx]%d\n", i));
         }
     }
@@ -105,12 +106,13 @@ void list_save(LIST *list, FILE *fp, void(*save_elem_fn)(void*, FILE*)){
     DEBUG_WRITE(("list_save end\n"));
 }
 
-void list_load(LIST *list, FILE *fp, void(*load_elem_fn)(void*, FILE*)){
+void list_load(LIST *list, FILE *fp, void(*load_elem_fn)(void*, FILE*), void(*free_elem_fn)(void*)){
     assert(fp != NULL);
     DEBUG_WRITE(("list_load begin\n"));
     fread(list, sizeof(LIST), 1, fp); //LIST
     DEBUG_WRITE(("list_load [alloc_len]:%d, [used_len]:%d\n", list->alloc_len, list->used_len));
     list->header = malloc(list->alloc_len * list->elem_size);
+    list->free_elem_fn = free_elem_fn;
 
     int i;
     void *elem;
@@ -132,12 +134,12 @@ void list_load(LIST *list, FILE *fp, void(*load_elem_fn)(void*, FILE*)){
 
 
 ////////////////////////////////
-void stack_new(STACK *stack, int elem_size){
-    list_new((LIST*)stack, elem_size);
+void stack_new(STACK *stack, int elem_size, void(*free_elem_fn)(void*)){
+    list_new((LIST*)stack, elem_size, free_elem_fn);
 }
 
-void stack_free(STACK *stack, void(*free_elem_fn)(void*)){
-    list_free((LIST*)stack, free_elem_fn);
+void stack_free(STACK *stack){
+    list_free((LIST*)stack);
 }
 
 void* stack_push(STACK *stack, void *data){

@@ -3,23 +3,20 @@
 #include <string.h>
 #include "train.h"
 
-LIST* init_trains(){
-    LIST *trains = malloc(sizeof(LIST));
-    list_new(trains, sizeof(TRAIN));
-    return trains;
-}
-
 static void _destroy_train(void *data){
     TRAIN *train = (TRAIN*)data;
     DEBUG_WRITE(("_destroy_train: [no]%s, [stations]%p, [size]%d\n",
         train->no, train->stations, train->stations->used_len));
-    list_free(train->stations, NULL);//need't free each STATION(in stack memory)
+    list_free(train->stations);
     free(train->stations);
 }
 
+void init_trains(LIST *trains){
+    list_new(trains, sizeof(TRAIN), _destroy_train);//need free
+}
+
 void destroy_trains(LIST *trains){
-    list_free(trains, _destroy_train);//need free
-    free(trains);
+    list_free(trains);
 }
 
 static BOOL _cmp_train(void *exist, void *data){
@@ -34,7 +31,7 @@ TRAIN* add_train(LIST *trains, char *no){
     TRAIN *ret =(TRAIN*)list_add_unique_elem(trains, &nt, _cmp_train);
     if(ret != NULL){// init stations when successful
         ret->stations = malloc(sizeof(LIST));
-        list_new(ret->stations, sizeof(STATION));
+        list_new(ret->stations, sizeof(STATION), NULL);//need't free each STATION(in stack memory)
     }
     return ret;
 }
@@ -141,11 +138,9 @@ static void _load_train(void *elem, FILE *fp){
     TRAIN *train = (TRAIN*)elem;
     fread(train, sizeof(TRAIN), 1, fp);
     train->stations = malloc(sizeof(LIST));
-    list_load(train->stations, fp, NULL);
+    list_load(train->stations, fp, NULL, NULL);
 }
 
-LIST* load_trains(FILE* fp){
-    LIST *trains = malloc(sizeof(LIST));
-    list_load(trains, fp, _load_train);
-    return trains;
+void load_trains(LIST *trains, FILE* fp){
+    list_load(trains, fp, _load_train, _destroy_train);
 }

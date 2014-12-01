@@ -11,7 +11,7 @@ typedef struct MENU_TAG{
     LIST *sub_menus;
 } MENU;
 
-MENU* init_menu();
+void init_menu(MENU* root);
 void destroy_menu(MENU* root);
 
 void insert_menu(MENU *root, int id, int par_id, int op, char *text, void(*call_fn)(MENU *cur, void *env));

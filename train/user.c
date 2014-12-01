@@ -3,12 +3,6 @@
 #include <string.h>
 #include "user.h"
 
-LIST* init_users(){
-    LIST *users = malloc(sizeof(LIST));
-    list_new(users, sizeof(USER));
-    return users;
-}
-
 static void _destroy_user(void *data){
     USER *u = (USER*)data;
     DEBUG_WRITE(("_destroy_user: [name]%s, [passwd]%s\n",
@@ -17,9 +11,13 @@ static void _destroy_user(void *data){
     free(u->passwd);
 }
 
+void init_users(LIST *users){//caller will assign users memory
+    list_new(users, sizeof(USER), _destroy_user);//need free
+}
+
 void destroy_users(LIST *users){
-    list_free(users, _destroy_user);//need free
-    free(users);
+    list_free(users);
+    //caller will [auto] free users memory
 }
 
 static BOOL _cmp_user_name(void *exist, void *data){
@@ -81,8 +79,6 @@ static void _load_user(void *elem, FILE *fp){
     user->passwd = strdup(passwd);
 }
 
-LIST* load_users(FILE* fp){
-    LIST *users = malloc(sizeof(LIST));
-    list_load(users, fp, _load_user);
-    return users;
+void load_users(LIST *users, FILE* fp){
+    list_load(users, fp, _load_user, _destroy_user);
 }

@@ -11,7 +11,7 @@ typedef struct{
     LIST *stations;
 } TRAIN;
 
-LIST* init_trains();
+void init_trains(LIST *trains);
 void destroy_trains(LIST *trains);
 
 TRAIN* add_train(LIST *trains, char *no);
@@ -25,6 +25,6 @@ void list_trains(LIST *trains);
 void list_train(TRAIN *train);
 void list_choice_train(TRAIN *train, char *start_station, char *end_station);
 
-void save_trains(LIST *trains, FILE* fp);
-LIST* load_trains(FILE* fp);
+void save_trains(LIST *trains, FILE *fp);
+void load_trains(LIST *trains, FILE *fp);
 

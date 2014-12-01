@@ -7,8 +7,10 @@ typedef struct{
     char *passwd;
 } USER;
 
-LIST* init_users();
-//void init_users(LIST*); //maybe better than above
+//return pointer of LIST see `git branch BR_01`
+//this version is better than that
+void init_users(LIST *users); 
+
 void destroy_users(LIST *users);
 
 BOOL register_user(LIST *users, char *name, char *passwd);
@@ -16,5 +18,5 @@ USER* validate_user(LIST *users, char *name, char *passwd);
 
 void list_users(LIST *users);
 
-void save_users(LIST *users, FILE* fp);
-LIST* load_users(FILE* fp);
+void save_users(LIST *users, FILE *fp);
+void load_users(LIST *users, FILE *fp);

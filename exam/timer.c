@@ -2,20 +2,21 @@
 #include "utils.h"
 
 
-void handler(){
-    printf("hello\n");
+void handler(void *env){
+    printf("hello %d\n", *((int*)env));
 }
 
 
-void handler2(){
-    printf("world\n");
+void handler2(void *env){
+    printf("world %d\n", *((int*)env));
 }
 
 
 
 int main(){
-
-    timer_new(3, handler);
+    int data = 999;
+    void *env = &data;
+    timer_new(3, handler, env);
     timer_start();
     // printf("%d\n", timer_interval());
 
@@ -24,7 +25,7 @@ int main(){
         printf("%d %s\n", i, timer_callee_name());
         sleep(1);
         if(i == 5) {
-            timer_new(3, handler2);
+            timer_new(3, handler2, env);
             timer_start();
 
         }

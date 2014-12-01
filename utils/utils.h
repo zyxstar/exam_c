@@ -118,17 +118,18 @@ struct{
     int const_interval;
     char callee_name[256];
     void(*callee_fn)();
+    void *env;
 } GLOBAL_SIMPLE_TIMER;
 
-#define timer_new(arg1, arg2) \
+#define timer_new(arg1, arg2, arg3) \
         _timer_set_callee_name(__FILE__, __LINE__, #arg2);\
-        _timer_set((arg1), (arg2)) \
+        _timer_set((arg1), (arg2), (arg3)) \
 
 #define timer_interval() GLOBAL_SIMPLE_TIMER.interval
 #define timer_callee_name() GLOBAL_SIMPLE_TIMER.callee_name
 
 void _timer_set_callee_name(char *file, int line, char *name);
-void _timer_set(int interval, void(*callee_fn)());
+void _timer_set(int interval, void(*callee_fn)(), void *env);
 
 void timer_start();
 void timer_stop();

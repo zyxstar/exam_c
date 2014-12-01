@@ -53,7 +53,7 @@ const char* human_bool(BOOL val){
 
 static void _timer_wrap_callee_fn(){
     DEBUG_WRITE(("timer_call begin: [callee_name]%s [interval]%d\n", GLOBAL_SIMPLE_TIMER.callee_name, GLOBAL_SIMPLE_TIMER.interval));
-    GLOBAL_SIMPLE_TIMER.callee_fn();
+    GLOBAL_SIMPLE_TIMER.callee_fn(GLOBAL_SIMPLE_TIMER.env);
     DEBUG_WRITE(("timer_call end: [callee_name]%s [interval]%d\n", GLOBAL_SIMPLE_TIMER.callee_name, GLOBAL_SIMPLE_TIMER.interval));
 
     alarm(GLOBAL_SIMPLE_TIMER.interval);
@@ -63,10 +63,11 @@ void _timer_set_callee_name(char *file, int line, char *name){
     sprintf(GLOBAL_SIMPLE_TIMER.callee_name, "%s:%d:%s", file, line, name);
 }
 
-void _timer_set(int interval, void(*callee_fn)()){
+void _timer_set(int interval, void(*callee_fn)(), void *env){
     GLOBAL_SIMPLE_TIMER.interval = 0;
     GLOBAL_SIMPLE_TIMER.const_interval = interval;
     GLOBAL_SIMPLE_TIMER.callee_fn = callee_fn;
+    GLOBAL_SIMPLE_TIMER.env = env;
     signal(SIGALRM, _timer_wrap_callee_fn);
     DEBUG_WRITE(("timer_new: [callee_name]%s [interval]%d\n", GLOBAL_SIMPLE_TIMER.callee_name, GLOBAL_SIMPLE_TIMER.const_interval));
 }

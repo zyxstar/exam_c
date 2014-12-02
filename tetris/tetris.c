@@ -252,11 +252,16 @@ static int _calc_score(int lines){
 }
 
 static BOOL _check_game_over(GAME *game){
+    DEBUG_WRITE(("_check_game_over: [down_count]\n", game->cur_block.down_count));
     return game->cur_block.down_count == 0;
 }
 
 void game_over(GAME *game){
-
+    DEBUG_WRITE(("game_over begin\n"));
+    game->draw_game_over(game);
+    free(game->panel);
+    free(game);
+    DEBUG_WRITE(("game_over end\n"));
 }
 
 BOOL move_down(GAME *game){
@@ -370,7 +375,7 @@ void _print_block(BLOCK *b){
 }
 
 void _print_game(GAME *game){
-    printf("GAME: [sroce]%d, [draw_view]%p, [next]%c%d\n", game->score, game->draw_view, game->next_block.type, game->next_block.turn_idx);
+    printf("\nGAME: [sroce]%d, [draw_view]%p, [next]%c%d\n", game->score, game->draw_view, game->next_block.type, game->next_block.turn_idx);
     _print_block(&game->cur_block);
     _print_panel(game->panel);
 }

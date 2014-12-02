@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "tetris.h"
 #include "utils.h"
+#include "tetris.h"
 
 void each_type_do(void(*callback)(char type)){
     char *types = "TOILJSZ";
@@ -72,9 +72,10 @@ void _test_move(char type, char *direction_str, BOOL(*func)(GAME*) ,int times){
     int i;
     BOOL ret;
     for(i = 1; i <= times; i++){
+        b = game->cur_block;
         ret = func(game);
         printf("%c[%d] %s[%d] %s\n",
-            game->cur_block.type, game->cur_block.turn_idx,
+            b.type, b.turn_idx,
             direction_str, i, human_bool(ret));
         if(!ret) break;
     }
@@ -155,12 +156,17 @@ void test_check_eliminate(){
 }
 
 
-// void test_move_down(char type){
-//     _test_move(type, "down", move_down, 20);
-// }
+void test_move_down(char type){
+    _test_move(type, "down", move_down, 20);
+}
 
 
-
+void test_game_over(){
+    GAME *game = init_game(_draw_view);
+    int i;
+    for(i = 0; i < 100; i++)
+        move_down(game);
+}
 
 
 int main(int argc, const char* argv[]){
@@ -185,9 +191,12 @@ int main(int argc, const char* argv[]){
 
     // each_type_do(test_panel_be_filled);
 
-    test_check_eliminate();
+    // test_check_eliminate();
 
     // each_type_do(test_move_down);
+
+    test_game_over();
+
 
     return 0;
 }

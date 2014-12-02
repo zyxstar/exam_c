@@ -40,6 +40,7 @@ typedef struct GAME_TAG{
     BLOCK next_block;
     void(*_origin_draw_view)(struct GAME_TAG*);
     void(*draw_view)(struct GAME_TAG*);
+    void(*draw_game_over)(struct GAME_TAG*);
 } GAME;
 
 // interface

@@ -9,10 +9,11 @@ void init_menu(MENU *root){
     root->id = 0;
     root->par_id = -1;
     root->text = strdup("root");
+    root->sub_menus = NULL;
 }
 
 static MENU* _get_menu_by_id(MENU *menu, int id){
-    // printf("mnue %d\n", menu->id);
+    DEBUG_WRITE(("_get_menu_by_id: [id]%d\n", id));
     if(menu->id == id) return menu;
     if(menu->sub_menus == NULL) return NULL;
     MENU *ret = NULL;
@@ -49,17 +50,16 @@ void destroy_menu(MENU* root){
 
 void insert_menu(MENU *root, int id, int par_id, int op, char *text,
                  void(*call_fn)(MENU *cur, void *env)){
-    // printf("id %d pid %d\n", id, par_id);
+    DEBUG_WRITE(("insert_menu begin: [id]%d, [pid]%d\n", id, par_id));
     MENU *target = _get_menu_by_id(root, par_id);
     assert(target != NULL);
-    // printf("pid===%d\n", target->id);
-
     if(target->sub_menus == NULL){
         target->sub_menus = malloc(sizeof(LIST));
         list_new(target->sub_menus, sizeof(MENU), _destroy_menu);
     }
     MENU m = {id, par_id, op, strdup(text), call_fn};
     list_add_elem(target->sub_menus, &m);
+    DEBUG_WRITE(("insert_menu end: [id]%d, [pid]%d\n", id, par_id));
 }
 
 

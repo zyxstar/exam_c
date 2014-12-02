@@ -195,10 +195,11 @@ int main(){
     MENU menu_root;
     init_menu(&menu_root);
 
+    prepare_menus(&menu_root);
+
     USER *cur_user = NULL;
     void *env[] = {&user_list, &train_list, &cur_user};
 
-    prepare_menus(&menu_root);
     show_menu(&menu_root, env);
 
     destroy_users(&user_list);

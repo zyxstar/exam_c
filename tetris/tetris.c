@@ -1,8 +1,11 @@
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
 #include "tetris.h"
 
 PANEL _init_panel(){
+    DEBUG_WRITE(("_init_panel begin\n"));
     PANEL panel = malloc(ROWS * COLS * sizeof(int));
     assert(panel != NULL);
     int row, col;
@@ -11,31 +14,39 @@ PANEL _init_panel(){
             panel[row][col] = EMPTY;
         }
     }
+    DEBUG_WRITE(("_init_panel end\n"));
     return panel;
 }
 
 BLOCK _rand_block(){
-    srand(time(NULL));
     char *types = "TOILJSZ";
     char type = types[rand()%strlen(types)];
     int turn_idx = rand()%4;
+    DEBUG_WRITE(("_rand_block: [type]%c, [turn_idx]%d\n", type, turn_idx));
     return _init_block(type, turn_idx);
 }
 
+void _wrap_draw_view(GAME *game){
+    DEBUG_WRITE(("_wrap_draw_view begin\n"));
+    //lock
+    game->_origin_draw_view(game);
+    //unlock
+    DEBUG_WRITE(("_wrap_draw_view end\n"));
+}
+
 GAME* init_game(void(*draw_view)(GAME*)){
+    DEBUG_WRITE(("init_game begin\n"));
     GAME *game = malloc(sizeof(GAME));
     game->score = 0;
     game->panel = _init_panel();
-    game->draw_view = draw_view;
+    game->_origin_draw_view = draw_view;
+    game->draw_view = _wrap_draw_view;
+    srand(time(NULL));
     game->cur_block = _rand_block();
     game->next_block = _rand_block();
+    DEBUG_WRITE(("init_game end\n"));
     return game;
 }
-
-//////////////////////////////////////////////////////////////////////////
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -44,10 +55,10 @@ static int _get_type_idx(char type){
     int i = 0;
     while(types[i]!='\0' && types[i] != type) i++;
     if(types[i] == type) return i;
-    return -1;
+    assert(FALSE);
 }
 
-void _config_base_pos_sets_of_T(POS_SET* sets){
+static void _config_base_pos_sets_of_T(POS_SET* sets){
     POS_SET p0 = {{0,1},{1,1},{2,1},{1,2}};
     POS_SET p1 = {{1,0},{1,1},{1,2},{0,1}};
     POS_SET p2 = {{2,1},{1,1},{0,1},{1,0}};
@@ -58,19 +69,19 @@ void _config_base_pos_sets_of_T(POS_SET* sets){
     sets[3] = p3;
 }
 
-void _config_base_pos_sets_of_O(POS_SET* sets){
-    POS_SET p0 = {{0,0},{1,0},{0,1},{1,1}};
+static void _config_base_pos_sets_of_O(POS_SET* sets){
+    POS_SET p0 = {{1,0},{2,0},{1,1},{2,1}};
     sets[0] = sets[1] = sets[2] = sets[3] = p0;
 }
 
-void _config_base_pos_sets_of_I(POS_SET* sets){
+static void _config_base_pos_sets_of_I(POS_SET* sets){
     POS_SET p0 = {{0,1},{1,1},{2,1},{3,1}};
     POS_SET p1 = {{1,0},{1,1},{1,2},{1,3}};
     sets[0] = sets[2] = p0;
     sets[1] = sets[3] = p1;
 }
 
-void _config_base_pos_sets_of_L(POS_SET* sets){
+static void _config_base_pos_sets_of_L(POS_SET* sets){
     POS_SET p0 = {{1,0},{1,1},{1,2},{2,2}};
     POS_SET p1 = {{3,1},{2,1},{1,1},{1,2}};
     POS_SET p2 = {{2,3},{2,2},{2,1},{1,1}};
@@ -81,7 +92,7 @@ void _config_base_pos_sets_of_L(POS_SET* sets){
     sets[3] = p3;
 }
 
-void _config_base_pos_sets_of_J(POS_SET* sets){
+static void _config_base_pos_sets_of_J(POS_SET* sets){
     POS_SET p0 = {{2,0},{2,1},{2,2},{1,2}};
     POS_SET p1 = {{3,2},{2,2},{1,2},{1,1}};
     POS_SET p2 = {{1,3},{1,2},{1,1},{2,1}};
@@ -92,18 +103,27 @@ void _config_base_pos_sets_of_J(POS_SET* sets){
     sets[3] = p3;
 }
 
-void _config_base_pos_sets_of_S(POS_SET* sets){
+static void _config_base_pos_sets_of_S(POS_SET* sets){
     POS_SET p0 = {{0,1},{1,1},{1,0},{2,0}};
     POS_SET p1 = {{0,0},{0,1},{1,1},{1,2}};
     sets[0] = sets[2] = p0;
     sets[1] = sets[3] = p1;
 }
 
-void _config_base_pos_sets_of_Z(POS_SET* sets){
+static void _config_base_pos_sets_of_Z(POS_SET* sets){
     POS_SET p0 = {{0,0},{1,1},{1,0},{2,1}};
     POS_SET p1 = {{1,0},{0,1},{1,1},{0,2}};
     sets[0] = sets[2] = p0;
     sets[1] = sets[3] = p1;
+}
+
+static POS_SET _move_center(POS_SET pos_set){
+    int offset = COLS / 2 - 2;
+    POS *set = (POS*)(&pos_set);
+    int i;
+    for(i = 0; i < 4; i++)
+        set[i].x += offset;
+    return pos_set;
 }
 
 BLOCK _init_block(char type, int turn_idx){
@@ -120,14 +140,14 @@ BLOCK _init_block(char type, int turn_idx){
     BLOCK b;
     b.type = type;
     b.turn_idx = turn_idx;
+    b.down_count = 0;
     config_set_fn[_get_type_idx(type)](b.base_pos_sets);
-    b.pos_set = b.base_pos_sets[turn_idx];
-
+    b.pos_set = _move_center(b.base_pos_sets[turn_idx]);
     return b;
 }
 
 //////////////////////////////////////////////////////////////////////////
-static BOOL _check_hit(const PANEL panel, BLOCK *b){
+static BOOL _check_hit(PANEL panel, BLOCK *b){
     POS *pos_set = (POS*)(&(b->pos_set));
     int i, pos_y, pos_x;
     for(i = 0; i < 4; i++){
@@ -150,7 +170,7 @@ static BOOL _move(GAME *game, POS direction){
         pos_set[i].x += direction.x;
         pos_set[i].y += direction.y;
     }
-    if(!_check_hit((const PANEL)game->panel, b)){
+    if(!_check_hit(game->panel, b)){
         *b = backup_b;
         return FALSE;
     }
@@ -160,48 +180,106 @@ static BOOL _move(GAME *game, POS direction){
 
 
 BOOL move_left(GAME *game){
+    DEBUG_WRITE(("move_left begin\n"));
     POS left = {-1, 0};
-    return _move(game, left);
+    BOOL is_moved = _move(game, left);
+    DEBUG_WRITE(("move_left end: [is_moved]%s\n", human_bool(is_moved)));
+    return is_moved;
 }
 
 BOOL move_right(GAME *game){
+    DEBUG_WRITE(("move_right begin\n"));
     POS right = {1, 0};
-    return _move(game, right);
+    BOOL is_moved = _move(game, right);
+    DEBUG_WRITE(("move_right end: [is_moved]%s\n", human_bool(is_moved)));
+    return is_moved;
 }
 
-
-static void _panel_be_filled(GAME *game){
+void _panel_be_filled(GAME *game){
+    DEBUG_WRITE(("_panel_be_filled begin\n"));
     POS *pos_set = (POS*)(&(game->cur_block.pos_set));
     int i;
     for(i = 0; i < 4; i++)
         game->panel[pos_set[i].y][pos_set[i].x] = FILLED;
-    game->draw_view(game);
+    DEBUG_WRITE(("_panel_be_filled end\n"));
 }
 
-static int _check_eliminate(GAME *game){
-    printf("eliminate\n");
-    //add sroce
+void _begin_next_frame(GAME *game){
+    DEBUG_WRITE(("_begin_next_frame begin\n"));
+    game->cur_block = game->next_block;
+    game->next_block = _rand_block();
     game->draw_view(game);
-    
+    DEBUG_WRITE(("_begin_next_frame end: [next]%c%d\n",
+        game->next_block.type, game->next_block.turn_idx));
 }
 
-BOOL _check_game_over(){}
+static BOOL _all_cols_be_filled(PANEL panel, int row){
+    int col;
+    for(col = 0; col < COLS; col++)
+        if(panel[row][col] == EMPTY) return FALSE;
+    return TRUE;
+}
 
-void _begin_next(){}
+static void _eliminate(PANEL panel, int row){
+    int col, r;
+    for(r = row; r > 0; r--){
+        for(col = 0; col < COLS; col++){
+            panel[r][col] = panel[r-1][col];
+        }
+    }
+    for(col = 0; col < COLS; col++)
+        panel[0][col] = EMPTY;
+}
+
+int _check_eliminate(GAME *game){
+    DEBUG_WRITE(("_check_eliminate begin\n"));
+    int row, lines = 0;
+    for(row = 0; row < ROWS; row++){
+        if(_all_cols_be_filled(game->panel, row)){
+            lines++;
+            _eliminate(game->panel, row);
+        }
+    }
+    if(lines > 0) game->draw_view(game);
+    DEBUG_WRITE(("_check_eliminate end: [lines]\n", lines));
+    return lines;
+}
+
+static int _calc_score(int lines){
+    assert(lines >= 0 && lines <= 4);
+    int rules[] = {0, 100, 200, 400, 800};
+    return rules[lines];
+}
+
+static BOOL _check_game_over(GAME *game){
+    return game->cur_block.down_count == 0;
+}
+
+void game_over(GAME *game){
+
+}
 
 BOOL move_down(GAME *game){
+    DEBUG_WRITE(("move_down begin\n"));
     POS down = {0, 1};
     //lock
-    BOOL ret = _move(game, down);
-    if(!ret){ //when down finished
+    BOOL is_moved = _move(game, down);
+    if(!is_moved){ //when down finished
+        if(_check_game_over(game))
+            game_over(game);
+
         _panel_be_filled(game);
-        _check_eliminate(game);
-        if(!_check_game_over())
-            _begin_next();
+        _begin_next_frame(game);
+        int lines = _check_eliminate(game);
+        game->score += _calc_score(lines);
     }
+    else game->cur_block.down_count++;
+
     //unlock
-    return ret;
+    DEBUG_WRITE(("move_down end: [is_moved]%s\n", human_bool(is_moved)));
+    return is_moved;
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 POS_SET _pos_set_diff(POS_SET set1, POS_SET set2, int sign){//sign is 1 or -1
@@ -224,10 +302,10 @@ static void _trun_block(BLOCK *b){
 }
 
 BOOL turn(GAME *game){
-    BLOCK *b = &(game->cur_block);    
+    BLOCK *b = &(game->cur_block);
     BLOCK backup_b = *b;
     _trun_block(b);
-    if(!_check_hit((const PANEL)panel, b)){
+    if(!_check_hit(game->panel, b)){
         *b = backup_b;
         return FALSE;
     }
@@ -236,31 +314,48 @@ BOOL turn(GAME *game){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////
-void _print_panel(const PANEL panel){
+void _print_panel(PANEL panel){
     int row, col;
-    printf("PANEL: \n");
+    printf("PANEL: 0123456789\n");
     for(row = 0; row < ROWS; row++){
-        printf("     ");
+        printf("       ");
         for(col = 0; col < COLS; col++){
-            printf("%c", panel[row][col] == FILLED ? '#' : '_');
+            printf("%c", panel[row][col] == FILLED ? 'O' : '_');
         }
-        printf(" : %2d\n", row);
+        printf(" %d\n", row);
     }
 }
 
 
-void _print_block(const BLOCK *b){
-    printf("%c:%d", b->type, b->turn_idx);
-    printf("[{%d,%d},{%d,%d},{%d,%d},{%d,%d}]\n",
+void _print_block(BLOCK *b){
+    printf("%c[%d][%d]", b->type, b->turn_idx, b->down_count);
+    printf("{{%d,%d},{%d,%d},{%d,%d},{%d,%d}}\n",
             b->pos_set.pos0.x, b->pos_set.pos0.y,
             b->pos_set.pos1.x, b->pos_set.pos1.y,
             b->pos_set.pos2.x, b->pos_set.pos2.y,
             b->pos_set.pos3.x, b->pos_set.pos3.y);
 
     int row, col;
+    printf("       0123456789\n");
     for(row = 0; row < ROWS; row++){
-        printf("%2d : ", row);
+        printf("    %2d ", row);
         for(col = 0; col < COLS; col++){
             if((b->pos_set.pos0.x == col && b->pos_set.pos0.y == row) ||
                (b->pos_set.pos1.x == col && b->pos_set.pos1.y == row) ||
@@ -272,6 +367,12 @@ void _print_block(const BLOCK *b){
         }
         printf("\n");
     }
+}
+
+void _print_game(GAME *game){
+    printf("GAME: [sroce]%d, [draw_view]%p, [next]%c%d\n", game->score, game->draw_view, game->next_block.type, game->next_block.turn_idx);
+    _print_block(&game->cur_block);
+    _print_panel(game->panel);
 }
 
 

@@ -161,6 +161,21 @@ void test_move_down(char type){
 }
 
 
+void test_move_turn(){
+    GAME *game = init_game(_draw_view);
+    game->panel = (PANEL)GLOBAL_PANEL;
+    BLOCK b = _init_block('O', 0);
+    game->cur_block = b;
+
+    move_down(game);
+    move_left(game);
+    move_left(game);
+    move_left(game);
+    move_left(game);
+    turn(game);
+
+}
+
 void test_game_over(){
     GAME *game = init_game(_draw_view);
     int i;
@@ -175,7 +190,6 @@ int main(int argc, const char* argv[]){
     // test_init_block();
     // test_rand_block();
     // test_init_game();
-
 
 
     // each_type_do(test_move_left);
@@ -195,7 +209,9 @@ int main(int argc, const char* argv[]){
 
     // each_type_do(test_move_down);
 
-    test_game_over();
+    test_move_turn();
+
+    // test_game_over();
 
 
     return 0;

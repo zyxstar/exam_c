@@ -82,6 +82,7 @@
 #define VT_SHOW_CUR             "\033[?25h"
 
 
+
 #ifdef DEBUG
 #define DEBUG_WRITE(arg) debug_write arg
 #else
@@ -111,29 +112,34 @@ const char* human_bool(BOOL val);
 
 
 
-
+typedef struct{
+    int interval; //millisecond
+    int const_interval;
+    int count;
+    char callee_name[256];
+    void(*callee_fn)(void *env);
+    void *env;
+} SIMPER_TIMER;
 
 struct{
-    int interval;
-    int const_interval;
-    char callee_name[256];
-    void(*callee_fn)();
-    void *env;
-} GLOBAL_SIMPLE_TIMER;
+    BOOL is_start;
+    int size;
+    SIMPER_TIMER *timer_queue[256];
+} GLOBAL_TIMER_QUEUE;
 
-#define timer_new(arg1, arg2, arg3) \
-        _timer_set_callee_name(__FILE__, __LINE__, #arg2);\
-        _timer_set((arg1), (arg2), (arg3)) \
 
-#define timer_interval() GLOBAL_SIMPLE_TIMER.interval
-#define timer_callee_name() GLOBAL_SIMPLE_TIMER.callee_name
+#define timer_new(arg1, arg2, arg3, arg4) \
+        _timer_set_callee_name(arg1, __FILE__, __LINE__, #arg3);\
+        _timer_new((arg1), (arg2), (arg3), (arg4))
 
-void _timer_set_callee_name(char *file, int line, char *name);
-void _timer_set(int interval, void(*callee_fn)(), void *env);
 
-void timer_start();
-void timer_stop();
+void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env);
 
+void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name);
+
+void timer_start(SIMPER_TIMER *timer);
+void timer_stop(SIMPER_TIMER *timer);
+void timer_destroy(SIMPER_TIMER *timer);
 
 
 

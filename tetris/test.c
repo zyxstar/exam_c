@@ -3,6 +3,58 @@
 #include "utils.h"
 #include "tetris.h"
 
+////////////////////////////////////////
+///test_helper
+////////////////////////////////////////
+
+void _print_panel(PANEL panel){
+    int row, col;
+    printf("PANEL: 0123456789\n");
+    for(row = 0; row < ROWS; row++){
+        printf("       ");
+        for(col = 0; col < COLS; col++){
+            printf("%c", panel[row][col] == FILLED ? 'O' : '_');
+        }
+        printf(" %d\n", row);
+    }
+}
+
+
+void _print_block(BLOCK *b){
+    printf("%c[%d][%d]", b->type, b->turn_idx, b->down_count);
+    printf("{{%d,%d},{%d,%d},{%d,%d},{%d,%d}}\n",
+            b->pos_set.pos0.x, b->pos_set.pos0.y,
+            b->pos_set.pos1.x, b->pos_set.pos1.y,
+            b->pos_set.pos2.x, b->pos_set.pos2.y,
+            b->pos_set.pos3.x, b->pos_set.pos3.y);
+
+    int row, col;
+    printf("       0123456789\n");
+    for(row = 0; row < ROWS; row++){
+        printf("    %2d ", row);
+        for(col = 0; col < COLS; col++){
+            if((b->pos_set.pos0.x == col && b->pos_set.pos0.y == row) ||
+               (b->pos_set.pos1.x == col && b->pos_set.pos1.y == row) ||
+               (b->pos_set.pos2.x == col && b->pos_set.pos2.y == row) ||
+               (b->pos_set.pos3.x == col && b->pos_set.pos3.y == row))
+                printf("#");
+            else
+                printf("_");
+        }
+        printf("\n");
+    }
+}
+
+void _print_game(GAME *game){
+    printf("\nGAME: [sroce]%d, [draw_view]%p, [next]%c%d\n", game->score, game->draw_view, game->next_block.type, game->next_block.turn_idx);
+    _print_block(&game->cur_block);
+    _print_panel(game->panel);
+}
+
+
+
+
+
 void each_type_do(void(*callback)(char type)){
     char *types = "TOILJSZ";
     int i = 0;

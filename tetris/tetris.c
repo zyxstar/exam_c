@@ -26,24 +26,33 @@ BLOCK _rand_block(){
     return _init_block(type, turn_idx);
 }
 
-void _wrap_draw_view(GAME *game){
-    DEBUG_WRITE(("_wrap_draw_view begin\n"));
-    //lock
-    game->_origin_draw_view(game);
-    //unlock
-    DEBUG_WRITE(("_wrap_draw_view end\n"));
-}
-
-GAME* init_game(void(*draw_view)(GAME*)){
+GAME* init_game(void(*draw_level)(GAME*), void(*draw_score)(GAME*), void(*draw_next)(GAME*),
+    void(*draw_block)(GAME*),void(*draw_change)(BLOCK*, GAME*), void(*draw_panel)(GAME*), void(*draw_game_over)(GAME*)){
     DEBUG_WRITE(("init_game begin\n"));
     GAME *game = malloc(sizeof(GAME));
     game->score = 0;
+    game->level = 1;
+    game->timer_interval = 1000;
+    game->is_over = FALSE;
+    game->is_pause = FALSE;
     game->panel = _init_panel();
-    game->_origin_draw_view = draw_view;
-    game->draw_view = _wrap_draw_view;
-    srand(time(NULL));
+
+    game->draw_level = draw_level;
+    game->draw_score = draw_score;
+    game->draw_next = draw_next;
+    game->draw_block = draw_block;
+    game->draw_change = draw_change;
+    game->draw_panel = draw_panel;    
+    game->draw_game_over = draw_game_over;
+
     game->cur_block = _rand_block();
     game->next_block = _rand_block();
+
+    draw_level(game);
+    draw_score(game);
+    draw_next(game);
+    draw_block(game);
+
     DEBUG_WRITE(("init_game end\n"));
     return game;
 }
@@ -174,12 +183,13 @@ static BOOL _move(GAME *game, POS direction){
         *b = backup_b;
         return FALSE;
     }
-    game->draw_view(game);
+    game->draw_change(&backup_b, game);
     return TRUE;
 }
 
 
 BOOL move_left(GAME *game){
+    if(game->is_over || game->is_pause) return FALSE;
     DEBUG_WRITE(("move_left begin\n"));
     POS left = {-1, 0};
     BOOL is_moved = _move(game, left);
@@ -188,6 +198,7 @@ BOOL move_left(GAME *game){
 }
 
 BOOL move_right(GAME *game){
+    if(game->is_over || game->is_pause) return FALSE;
     DEBUG_WRITE(("move_right begin\n"));
     POS right = {1, 0};
     BOOL is_moved = _move(game, right);
@@ -201,15 +212,17 @@ void _panel_be_filled(GAME *game){
     int i;
     for(i = 0; i < 4; i++)
         game->panel[pos_set[i].y][pos_set[i].x] = FILLED;
+    game->draw_panel(game);
     DEBUG_WRITE(("_panel_be_filled end\n"));
 }
 
-void _begin_next_frame(GAME *game){
-    DEBUG_WRITE(("_begin_next_frame begin\n"));
+void _begin_next(GAME *game){
+    DEBUG_WRITE(("_begin_next begin\n"));
     game->cur_block = game->next_block;
     game->next_block = _rand_block();
-    game->draw_view(game);
-    DEBUG_WRITE(("_begin_next_frame end: [next]%c%d\n",
+    game->draw_block(game);
+    game->draw_next(game);
+    DEBUG_WRITE(("_begin_next end: [next]%c%d\n",
         game->next_block.type, game->next_block.turn_idx));
 }
 
@@ -231,7 +244,21 @@ static void _eliminate(PANEL panel, int row){
         panel[0][col] = EMPTY;
 }
 
-int _check_eliminate(GAME *game){
+static int _calc_score(int lines){
+    assert(lines >= 0 && lines <= 4);
+    int rules[] = {0, 100, 200, 400, 800};
+    return rules[lines];
+}
+
+static void _check_level_up(GAME *game){
+    int level = game->score / 1000 + 1;
+    if(game->level != level){
+        game->level = level;
+        game->draw_level(game);
+    }
+}
+
+void _check_eliminate(GAME *game){
     DEBUG_WRITE(("_check_eliminate begin\n"));
     int row, lines = 0;
     for(row = 0; row < ROWS; row++){
@@ -240,16 +267,15 @@ int _check_eliminate(GAME *game){
             _eliminate(game->panel, row);
         }
     }
-    if(lines > 0) game->draw_view(game);
+    if(lines > 0){
+        game->score += _calc_score(lines);
+        _check_level_up(game);
+        game->draw_score(game);
+        game->draw_panel(game);
+    }
     DEBUG_WRITE(("_check_eliminate end: [lines]\n", lines));
-    return lines;
 }
 
-static int _calc_score(int lines){
-    assert(lines >= 0 && lines <= 4);
-    int rules[] = {0, 100, 200, 400, 800};
-    return rules[lines];
-}
 
 static BOOL _check_game_over(GAME *game){
     DEBUG_WRITE(("_check_game_over: [down_count]\n", game->cur_block.down_count));
@@ -258,13 +284,31 @@ static BOOL _check_game_over(GAME *game){
 
 void game_over(GAME *game){
     DEBUG_WRITE(("game_over begin\n"));
+    game->is_over = TRUE;
     game->draw_game_over(game);
-    free(game->panel);
-    free(game);
     DEBUG_WRITE(("game_over end\n"));
 }
 
+void destroy_game(GAME *game){
+    free(game->panel);
+    free(game);
+}
+
+void game_pause(GAME *game){
+    if(!game->is_pause){
+        game->is_pause = TRUE;
+        game->timer_interval_bak = game->timer_interval;
+        game->timer_interval = 0;
+    }
+    else{
+        game->is_pause = FALSE;
+        game->timer_interval = game->timer_interval_bak;
+    }
+}
+
+
 BOOL move_down(GAME *game){
+    if(game->is_over || game->is_pause) return FALSE;
     DEBUG_WRITE(("move_down begin\n"));
     POS down = {0, 1};
     //lock
@@ -274,9 +318,8 @@ BOOL move_down(GAME *game){
             game_over(game);
 
         _panel_be_filled(game);
-        _begin_next_frame(game);
-        int lines = _check_eliminate(game);
-        game->score += _calc_score(lines);
+        _begin_next(game);
+        _check_eliminate(game);        
     }
     else game->cur_block.down_count++;
 
@@ -299,7 +342,7 @@ POS_SET _pos_set_diff(POS_SET set1, POS_SET set2, int sign){//sign is 1 or -1
     return *((POS_SET*)ret);
 }
 
-static void _trun_block(BLOCK *b){
+static void _turn_block(BLOCK *b){
     POS_SET base_pos_set = b->base_pos_sets[b->turn_idx];
     POS_SET offset = _pos_set_diff(b->pos_set, base_pos_set, -1);
     b->turn_idx = (b->turn_idx + 1) % 4;
@@ -307,78 +350,21 @@ static void _trun_block(BLOCK *b){
 }
 
 BOOL turn(GAME *game){
+    if(game->is_over || game->is_pause) return FALSE;
+    DEBUG_WRITE(("turn begin\n"));    
     BLOCK *b = &(game->cur_block);
     BLOCK backup_b = *b;
-    _trun_block(b);
+    BOOL is_turned = TRUE;
+    _turn_block(b);
     if(!_check_hit(game->panel, b)){
         *b = backup_b;
-        return FALSE;
+        is_turned = FALSE;
     }
-    game->draw_view(game);
-    return TRUE;
+    game->draw_change(&backup_b, game);
+    DEBUG_WRITE(("turn end\n"));
+    return is_turned;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////
-void _print_panel(PANEL panel){
-    int row, col;
-    printf("PANEL: 0123456789\n");
-    for(row = 0; row < ROWS; row++){
-        printf("       ");
-        for(col = 0; col < COLS; col++){
-            printf("%c", panel[row][col] == FILLED ? 'O' : '_');
-        }
-        printf(" %d\n", row);
-    }
-}
-
-
-void _print_block(BLOCK *b){
-    printf("%c[%d][%d]", b->type, b->turn_idx, b->down_count);
-    printf("{{%d,%d},{%d,%d},{%d,%d},{%d,%d}}\n",
-            b->pos_set.pos0.x, b->pos_set.pos0.y,
-            b->pos_set.pos1.x, b->pos_set.pos1.y,
-            b->pos_set.pos2.x, b->pos_set.pos2.y,
-            b->pos_set.pos3.x, b->pos_set.pos3.y);
-
-    int row, col;
-    printf("       0123456789\n");
-    for(row = 0; row < ROWS; row++){
-        printf("    %2d ", row);
-        for(col = 0; col < COLS; col++){
-            if((b->pos_set.pos0.x == col && b->pos_set.pos0.y == row) ||
-               (b->pos_set.pos1.x == col && b->pos_set.pos1.y == row) ||
-               (b->pos_set.pos2.x == col && b->pos_set.pos2.y == row) ||
-               (b->pos_set.pos3.x == col && b->pos_set.pos3.y == row))
-                printf("#");
-            else
-                printf("_");
-        }
-        printf("\n");
-    }
-}
-
-void _print_game(GAME *game){
-    printf("\nGAME: [sroce]%d, [draw_view]%p, [next]%c%d\n", game->score, game->draw_view, game->next_block.type, game->next_block.turn_idx);
-    _print_block(&game->cur_block);
-    _print_panel(game->panel);
-}
 
 
 // int (*pnl)[COLS] = (int(*)[COLS])panel;

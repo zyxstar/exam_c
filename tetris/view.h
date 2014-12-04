@@ -14,5 +14,6 @@ void draw_level(int frame_top, int frame_left, int level);
 void draw_score(int frame_top, int frame_left, int score);
 void draw_next_block(int frame_top, int frame_left, BLOCK *block);
 void draw_panel_block(int frame_top, int frame_left, BLOCK *block);
+void erase_panel_block(int frame_top, int frame_left, BLOCK *block);
 void draw_panel(int frame_top, int frame_left, PANEL panel);
-
+void draw_over(int frame_top, int frame_left);

@@ -35,16 +35,29 @@ typedef int (*PANEL)[COLS];
 
 typedef struct GAME_TAG{
     int score;
+    int level;
+    int timer_interval;
+    int timer_interval_bak;
+    BOOL is_over;
+    BOOL is_pause;
     PANEL panel;
     BLOCK cur_block;
     BLOCK next_block;
-    void(*_origin_draw_view)(struct GAME_TAG*);
-    void(*draw_view)(struct GAME_TAG*);
+
+    void(*draw_level)(struct GAME_TAG*);
+    void(*draw_score)(struct GAME_TAG*);
+    void(*draw_next)(struct GAME_TAG*);
+
+    void(*draw_block)(struct GAME_TAG*);
+    void(*draw_change)(BLOCK *last, struct GAME_TAG*);
+    void(*draw_panel)(struct GAME_TAG*);
     void(*draw_game_over)(struct GAME_TAG*);
+
 } GAME;
 
 // interface
-GAME* init_game(void(*draw_view)(GAME*));
+GAME* init_game(void(*draw_level)(GAME*), void(*draw_score)(GAME*), void(*draw_next)(GAME*),
+     void(*draw_block)(GAME*),void(*draw_change)(BLOCK*, GAME*), void(*draw_panel)(GAME*), void(*draw_game_over)(GAME*));
 BOOL move_left(GAME *game);
 BOOL move_right(GAME *game);
 BOOL move_down(GAME *game);
@@ -53,7 +66,8 @@ BOOL turn(GAME *game); //means turn left
 void game_begin(GAME *game);
 void game_pause(GAME *game);
 void game_over(GAME *game);
-
+void game_pause(GAME *game);
+void destroy_game(GAME *game);
 
 // for unit test
 PANEL _init_panel();
@@ -62,12 +76,7 @@ BLOCK _rand_block();
 
 void _panel_be_filled(GAME *game);
 void _begin_next_frame(GAME *game);
-int _check_eliminate(GAME *game);
-
-
-void _print_game(GAME *game);
-void _print_panel(PANEL panel);
-void _print_block(BLOCK *b);
+void _check_eliminate(GAME *game);
 
 
 #endif /*TETRIS_H_INCLUEDE*/

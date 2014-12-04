@@ -86,5 +86,5 @@ int main(int argc, const char* argv[]){
 }
 
 
-// gcc -I ../utils ../utils/utils.c app.c tetris.c -o app.out -DDEBUG && ./app.out
-// gcc -I ../utils ../utils/utils.c app.c tetris.c -o app.out && ./app.out
+// gcc -I ../utils ../utils/utils.c tetris.c view.c app.c -o app.out -DDEBUG && ./app.out
+// gcc -I ../utils ../utils/utils.c tetris.c view.c app.c -o app.out && ./app.out

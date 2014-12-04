@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <termios.h>
 #include <string.h>
+#include <signal.h>
 
 static struct termios stored_settings1;
 static struct termios stored_settings2;
@@ -43,17 +44,28 @@ void reset_keypress(void)
   tcsetattr(0, TCSANOW, &stored_settings2);
   return;
 }
+
+void app_end(){
+    reset_keypress();
+    echo_on();
+    // printf("bye\033[?25h\n");
+}
+
 int main()
 {
+
+  signal(SIGTERM, app_end);
+  atexit(app_end);
+  // printf("\033[?25l");
+  echo_off();
+  set_keypress();
 
   printf("========================\n");
   printf("0. Main menu\n");
   printf("1. Chapter one\n");
   printf("2. Chapter two\n");
   printf("3. Chapter three\n");
-  printf("========================\033[?25h\n");
-  echo_off();
-  set_keypress();
+  printf("========================\n");
   char ch;
   while((ch = getchar() ) != 'q')
   {
@@ -71,10 +83,15 @@ int main()
         printf("Entering other chapter.\n");
      }
    }
-  reset_keypress();
-  echo_on();
+
   return 0;
 
 }
+
+
+
+
+
+
 
 //gcc exam.c -o exam.out && ./exam.out

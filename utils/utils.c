@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <signal.h>
+#include <termios.h>
 #include "utils.h"
 
 void debug_write(char *format, ...){
@@ -50,6 +51,38 @@ const char* human_bool(BOOL val){
 }
 
 
+static struct termios stored_settings1;
+static struct termios stored_settings2;
+
+void echo_off(){
+    struct termios new_settings;
+    tcgetattr(0,&stored_settings1);
+    new_settings =stored_settings1;
+    new_settings.c_lflag &= (~ECHO);
+    tcsetattr(0,TCSANOW,&new_settings);
+}
+
+void echo_on(){
+    tcsetattr(0,TCSANOW,&stored_settings1);
+}
+
+void set_keypress(){
+    struct termios new_settings;
+    tcgetattr(0,&stored_settings2);
+    new_settings = stored_settings2;
+
+    /*Disable canornical mode, and set buffer size to 1 byte */
+    new_settings.c_lflag&=(~ICANON);
+    new_settings.c_cc[VTIME] = 0;
+    new_settings.c_cc[VMIN] = 1;
+
+    tcsetattr(0, TCSANOW, &new_settings);
+}
+
+void reset_keypress(){
+    tcsetattr(0, TCSANOW, &stored_settings2);
+}
+
 
 
 
@@ -58,6 +91,7 @@ void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *nam
 }
 
 void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env){
+    if(GLOBAL_TIMER_QUEUE.size == 64) return;
     timer->interval = 0;
     timer->const_interval = interval;
     timer->count = 0;

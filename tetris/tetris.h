@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-#define ROWS 16
+#define ROWS 20
 #define COLS 10
 
 typedef enum{

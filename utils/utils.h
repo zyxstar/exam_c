@@ -81,6 +81,12 @@
 #define VT_HIED_CUR             "\033[?25l"
 #define VT_SHOW_CUR             "\033[?25h"
 
+#define VT_SET_CUR              "\033[%d;%dH"
+#define VT_CLEAR_SCREEN         "\033[2J"
+
+
+
+
 
 
 #ifdef DEBUG
@@ -112,6 +118,14 @@ const char* human_bool(BOOL val);
 
 
 
+void echo_off();
+void echo_on();
+
+void set_keypress();
+void reset_keypress();
+
+
+
 typedef struct{
     int interval; //millisecond
     int const_interval;
@@ -124,7 +138,7 @@ typedef struct{
 struct{
     BOOL is_start;
     int size;
-    SIMPER_TIMER *timer_queue[256];
+    SIMPER_TIMER *timer_queue[64];
 } GLOBAL_TIMER_QUEUE;
 
 

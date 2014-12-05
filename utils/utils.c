@@ -153,5 +153,10 @@ void timer_destroy(SIMPER_TIMER *timer){
     }
 }
 
+void timer_set_interval(SIMPER_TIMER *timer, int interval){
+    timer->const_interval = interval;
+    timer->interval = interval;
+    timer->count = 0;
+}
 
 

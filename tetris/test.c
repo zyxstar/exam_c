@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
-#include "tetris.h"
+#include "game.h"
 
 ////////////////////////////////////////
 ///test_helper
@@ -269,5 +269,5 @@ int main(int argc, const char* argv[]){
     return 0;
 }
 
-// gcc -I ../utils ../utils/utils.c test.c tetris.c -o test.out -DDEBUG && ./test.out
-// gcc -I ../utils ../utils/utils.c test.c tetris.c -o test.out && ./test.out
+// gcc -I ../utils ../utils/utils.c test.c game.c -o test.out -DDEBUG && ./test.out
+// gcc -I ../utils ../utils/utils.c test.c game.c -o test.out && ./test.out

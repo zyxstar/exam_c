@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "tetris.h"
+#include "game.h"
 
 #define FRM_TOP 2
 #define FRM_WID 22
@@ -17,3 +17,6 @@ void draw_panel_block(int frame_top, int frame_left, BLOCK *block);
 void erase_panel_block(int frame_top, int frame_left, BLOCK *block);
 void draw_panel(int frame_top, int frame_left, PANEL panel);
 void draw_over(int frame_top, int frame_left);
+void draw_pause(int frame_top, int frame_left);
+void draw_running(int frame_top, int frame_left);
+void voice_failed();

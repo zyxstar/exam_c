@@ -334,10 +334,11 @@ void game_destroy(GAME *game){
 BOOL game_move_down(GAME *game){
     if(game->is_over || game->is_pause) return FALSE;
     DEBUG_WRITE(("game_move_down begin\n"));
-    POS down = {0, 1};
-    //lock
+
     pthread_mutex_lock(&game->mutex);
+    POS down = {0, 1};
     BOOL is_moved = _move(game, down);
+    
     if(!is_moved){ //when down finished
         if(_check_game_over(game))
             game_over(game);
@@ -349,7 +350,6 @@ BOOL game_move_down(GAME *game){
     else{
         game->cur_block.down_count++;
     }
-    //unlock
     pthread_mutex_unlock(&game->mutex);
     DEBUG_WRITE(("game_move_down end: [is_moved]%s\n", human_bool(is_moved)));
     return is_moved;

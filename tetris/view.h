@@ -19,4 +19,4 @@ void draw_panel(int frame_top, int frame_left, PANEL panel);
 void draw_over(int frame_top, int frame_left);
 void draw_pause(int frame_top, int frame_left);
 void draw_running(int frame_top, int frame_left);
-void voice_failed();
+

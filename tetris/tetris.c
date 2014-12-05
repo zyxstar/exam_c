@@ -65,19 +65,19 @@ void build_game(int frame_left, char turn_cd, char left_cd, char right_cd, char 
     while((ch = getchar()) != 'q'){
         switch(ch){
             case 'w': {
-                if(!game_turn(game)) voice_failed();
+                game_turn(game);
                 break;
             }
             case 'a': {
-                if(!game_move_left(game)) voice_failed();
+                game_move_left(game);
                 break;
             }
             case 'd': {
-                if(!game_move_right(game)) voice_failed();
+                game_move_right(game);
                 break;
             }
             case 's': {
-                if(!game_move_down(game)) voice_failed();
+                game_move_down(game);
                 break;
             }
             case 'p':{

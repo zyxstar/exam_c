@@ -6,11 +6,17 @@
 
 
 int main(int argc, const char* argv[]){
+set_keypress();
+    char ch;
+    while((ch = getchar()) != 'q'){
+        printf("=%d ", ch);
+        fflush(NULL);
+    }
+    reset_keypress();
 
-  init_frame();
-  return 0;
+    return 0;
 }
 
 
-// gcc -I ../utils ../utils/utils.c tetris.c view.c app.c -o app.out -DDEBUG && ./app.out
+// gcc -I ../utils ../utils/utils.c app.c -o app.out && ./app.out
 // gcc -I ../utils ../utils/utils.c tetris.c view.c app.c -o app.out && ./app.out

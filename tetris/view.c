@@ -124,7 +124,7 @@ void draw_running(int frame_top, int frame_left){
     _draw_tip(frame_top, frame_left, "Running...");
 }
 
-void voice_failed(){
+void voice(){
     printf("%c", 7);
     fflush(NULL);
 }

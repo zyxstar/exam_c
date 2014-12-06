@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <pthread.h>
 #include "game.h"
 
 PANEL _init_panel(){
@@ -272,8 +271,8 @@ static int _calc_score(int lines){
     return rules[lines];
 }
 
-static void _level_up(GAME *game){
-    int interval = 1000 - game->level * 300;
+static void _speed_up(GAME *game){
+    int interval = 1000 - game->level * 200;
     interval = interval > 0 ? interval : 10;
     timer_set_interval(&game->timer, interval);
 }
@@ -282,7 +281,7 @@ static void _check_level_up(GAME *game){
     int level = game->score / 1000 + 1;
     if(game->level != level){
         game->level = level;
-        _level_up(game);
+        _speed_up(game);
         game->ui->draw_level(game->ui);
     }
 }

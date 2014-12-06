@@ -1,7 +1,7 @@
 #include "utils.h"
 #include "game.h"
 
-#define FRM_TOP 2
+#define FRM_TOP 1
 #define FRM_WID 22
 #define FRM_EX_WID 12
 #define FRM_HEI 22

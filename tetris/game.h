@@ -1,6 +1,7 @@
 #ifndef GAME_H_INCLUEDE
 #define GAME_H_INCLUEDE
 
+#include <pthread.h>
 #include "utils.h"
 
 #define ROWS 20

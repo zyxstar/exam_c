@@ -4,8 +4,8 @@
 #include <pthread.h>
 #include "utils.h"
 
-#define ROWS 20
-#define COLS 10
+#define ROWS (20)
+#define COLS (10)
 
 typedef enum{
     EMPTY,

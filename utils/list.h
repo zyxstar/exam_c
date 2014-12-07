@@ -1,8 +1,8 @@
 #ifndef LIST_H_INCLUEDE
 #define LIST_H_INCLUEDE
 
-#include "utils.h"
 #include <stdio.h>
+#include "utils.h"
 
 typedef struct{
     void *header;
@@ -24,6 +24,9 @@ void list_each_elem_do(LIST *list, void *extra, void(*do_fn)(void* data, int idx
 
 void list_save(LIST *list, FILE *fp, void(*save_elem_fn)(void *elem, FILE *fp));
 void list_load(LIST *list, FILE *fp, void(*load_elem_fn)(void *elem, FILE *fp), void(*free_elem_fn)(void*));
+
+
+
 
 
 typedef LIST STACK;

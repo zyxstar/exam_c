@@ -10,7 +10,7 @@ int main(){
     PRESS_HANDLER handlers[20];    
 
     GAME_UI ui1;
-    GAME *game1 = game_facade(&ui1, 25, 'w','a','d','s','p', handlers, &size);
+    GAME *game1 = game_facade(&ui1, 15, 'w','a','d','s','p', handlers, &size);
 
     game_begin(game1);
     key_press_loop(handlers, size);

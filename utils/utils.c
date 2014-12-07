@@ -84,7 +84,11 @@ void reset_keypress(){
 }
 
 
-
+static struct{
+    BOOL is_start;
+    int size;
+    SIMPER_TIMER *timer_queue[64];
+} GLOBAL_TIMER_QUEUE;
 
 void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name){
     sprintf(timer->callee_name, "%s:%d:%s", file, line, name);

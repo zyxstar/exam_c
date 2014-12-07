@@ -135,11 +135,6 @@ typedef struct{
     void *env;
 } SIMPER_TIMER;
 
-struct{
-    BOOL is_start;
-    int size;
-    SIMPER_TIMER *timer_queue[64];
-} GLOBAL_TIMER_QUEUE;
 
 
 #define timer_new(arg1, arg2, arg3, arg4) \
@@ -150,7 +145,6 @@ struct{
 void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env);
 
 void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name);
-
 
 void timer_start(SIMPER_TIMER *timer);
 void timer_stop(SIMPER_TIMER *timer);

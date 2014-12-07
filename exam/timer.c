@@ -111,7 +111,7 @@ void handler2(){
     printf("tick %d\n", count);
 }
 
-#define itoc(arg) ##arg
+
 
 int main(){
     int data = 999;
@@ -124,7 +124,6 @@ int main(){
     timer_new(&timer2, 1000, handler2, env);
     timer_start(&timer2);
 
-    printf("%s\n", itoc(__LINE__));
 
     while(1);
 

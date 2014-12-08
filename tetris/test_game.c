@@ -76,7 +76,7 @@ void _draw_change(BLOCK *last, GAME_UI *ui){
     _print_game(ui->game);
 }
 
-GAME_UI ui={0, NULL, _draw_view, _draw_view, _draw_view, _draw_view,
+GAME_UI ui={0, {0}, NULL, _draw_view, _draw_view, _draw_view, _draw_view,
       _draw_change, _draw_view, _draw_view, _draw_view, _draw_view};
 
 ////////////////////////////////////////
@@ -223,32 +223,35 @@ void test_check_eliminate(){
 }
 
 
-// void test_move_down(char type){
-//     _test_move(type, "down", move_down, 20);
-// }
+void test_move_down(char type){
+    _test_move(type, "down", game_move_down, 21);
+}
 
 
-// void test_move_turn(){
-//     GAME *game = init_game(_draw_view);
-//     game->panel = (PANEL)GLOBAL_PANEL;
-//     BLOCK b = _init_block('O', 0);
-//     game->cur_block = b;
+void test_move_turn(){
+    GAME *game = game_init(&ui);
+    ui.game = game;
+    timer_destroy(&game->timer);
+    BLOCK b = _init_block('T', 0);
+    game->cur_block = b;
 
-//     move_down(game);
-//     move_left(game);
-//     move_left(game);
-//     move_left(game);
-//     move_left(game);
-//     turn(game);
+    game_move_down(game);
+    game_move_left(game);
+    game_move_left(game);
+    game_move_left(game);
+    game_move_left(game);
+    game_turn(game);
 
-// }
+}
 
-// void test_game_over(){
-//     GAME *game = init_game(_draw_view);
-//     int i;
-//     for(i = 0; i < 100; i++)
-//         move_down(game);
-// }
+void test_game_over(){
+    GAME *game = game_init(&ui);
+    ui.game = game;
+    timer_destroy(&game->timer);
+    int i;
+    for(i = 0; i < 100; i++)
+        game_move_down(game);
+}
 
 
 int main(int argc, const char* argv[]){
@@ -259,7 +262,7 @@ int main(int argc, const char* argv[]){
     // test_init_game();
 
 
-    // each_type_do(test_move_left);
+    each_type_do(test_move_left);
     // each_type_do(test_move_right);
     // each_type_do(test_move_with_filled);
 
@@ -272,7 +275,7 @@ int main(int argc, const char* argv[]){
 
     // each_type_do(test_panel_be_filled);
 
-    test_check_eliminate();
+    // test_check_eliminate();
 
     // each_type_do(test_move_down);
 
@@ -284,5 +287,5 @@ int main(int argc, const char* argv[]){
     return 0;
 }
 
-// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out -DDEBUG && ./test_game.out
-// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out && ./test_game.out > test.log
+// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out -DDEBUG -lm -lpthread && ./test_game.out
+// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out -lm -lpthread && ./test_game.out > test.log

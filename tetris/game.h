@@ -38,6 +38,7 @@ typedef struct GAME_TAG GAME;
 
 typedef struct GAME_UI_TAG{
     int frame_left;
+    SIMPER_TIMER timer;
     GAME *game;
 
     void(*draw_level)(struct GAME_UI_TAG*);
@@ -46,6 +47,7 @@ typedef struct GAME_UI_TAG{
 
     void(*draw_block)(struct GAME_UI_TAG*);
     void(*draw_change)(BLOCK *last, struct GAME_UI_TAG*);
+    void(*draw_eliminate)(struct GAME_UI_TAG*, int *lines, int lines_size);
     void(*draw_panel)(struct GAME_UI_TAG*);
     void(*draw_pause)(struct GAME_UI_TAG*);
     void(*draw_running)(struct GAME_UI_TAG*);

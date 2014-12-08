@@ -147,6 +147,7 @@ void timer_stop(SIMPER_TIMER *timer){
 
 void timer_destroy(SIMPER_TIMER *timer){
     if(timer == NULL) return;
+    timer_stop(timer);
     int i;
     for(i = 0; i < GLOBAL_TIMER_QUEUE.size; i++){
         if(timer == GLOBAL_TIMER_QUEUE.timer_queue[i]){
@@ -158,9 +159,11 @@ void timer_destroy(SIMPER_TIMER *timer){
 }
 
 void timer_set_interval(SIMPER_TIMER *timer, int interval){
+    DEBUG_WRITE(("timer_set_interval: [callee_name]%s [interval]%d -> %d\n", timer->callee_name, timer->const_interval, interval));
     timer->const_interval = interval;
     timer->interval = interval;
     timer->count = 0;
+
 }
 
 

@@ -21,6 +21,6 @@ int main(){
 }
 
 
-// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lpthread -DDEBUG && ./single_player.out 2>>debug.log
+// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lm -lpthread -DDEBUG && ./single_player.out 2>>debug.log
 
-// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lpthread && ./single_player.out
+// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lm -lpthread && ./single_player.out

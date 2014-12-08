@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "view.h"
 #include "tetris.h"
 
@@ -22,6 +23,20 @@ void _draw_change_fn(BLOCK *last, GAME_UI *ui){
 
 void _draw_panel_fn(GAME_UI *ui){
     draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
+}
+
+void _ui_timer_call(void *env){
+    GAME_UI *ui = (GAME_UI*)env;
+    if(ui->timer.interval == 0) return;
+    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 10);
+    timer_stop(&ui->timer);
+    draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
+    draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);
+}
+
+void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){
+    draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+    timer_start(&ui->timer);
 }
 
 void _draw_block_fn(GAME_UI *ui){
@@ -64,6 +79,7 @@ GAME* game_facade(GAME_UI *ui, int frame_left,
 
     GAME *game = game_init(ui);
     ui->game = game;
+    timer_new(&ui->timer, 100, _ui_timer_call, ui);
     ui->frame_left = frame_left;
     ui->draw_level = _draw_level_fn;
     ui->draw_score = _draw_score_fn;
@@ -71,6 +87,7 @@ GAME* game_facade(GAME_UI *ui, int frame_left,
     ui->draw_block = _draw_block_fn;
     ui->draw_change = _draw_change_fn;
     ui->draw_panel = _draw_panel_fn;
+    ui->draw_eliminate = _draw_eliminate_fn;
     ui->draw_pause = _draw_pause_fn;
     ui->draw_running = _draw_running_fn;
     ui->draw_game_over = _draw_game_over_fn;

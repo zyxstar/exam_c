@@ -21,4 +21,4 @@
     + 模型层发生的变化，借由`GAME_UI`来绘制UI，后者承担`GAME`与`view`之间的联系，由一系列函数指针组成的结构体，充担高级语言中的接口的概念
 - 避免了全局变量的存在，方便在单人应用`single_player`与双人应用`double_player`使用同一套逻辑
 
-> 运行时监控，`gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lpthread -DDEBUG && ./single_player.out 2>>debug.log`，并同时启动`tail f debug.log`
+> 运行时监控，`gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lm -lpthread -DDEBUG && ./single_player.out 2>>debug.log`，并同时启动`tail f debug.log`

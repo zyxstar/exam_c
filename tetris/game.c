@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 #include "game.h"
 
 PANEL _init_panel(){
@@ -265,43 +266,50 @@ static void _eliminate(PANEL panel, int row){
         panel[0][col] = EMPTY;
 }
 
-static int _calc_score(int lines){
-    assert(lines >= 0 && lines <= 4);
+static int _calc_score(int lines_size){
+    assert(lines_size >= 0 && lines_size <= 4);
     int rules[] = {0, 100, 200, 400, 800};
-    return rules[lines];
+    return rules[lines_size];
 }
 
 static void _speed_up(GAME *game){
-    int interval = 1000 - game->level * 200;
-    interval = interval > 0 ? interval : 10;
-    timer_set_interval(&game->timer, interval);
+    DEBUG_WRITE(("_speed_up begin: [level]%d\n", game->level));
+    int interval = 1000 * pow(0.8, game->level - 1);
+    interval = interval > 0 ? interval : 100;
+    DEBUG_WRITE(("_speed_up begin: [interval]%d, [timer]%p\n", interval, &game->timer));
+    timer_set_interval(&(game->timer), interval);
+    DEBUG_WRITE(("_speed_up end\n"));
 }
 
 static void _check_level_up(GAME *game){
+    DEBUG_WRITE(("_check_level_up begin: [score] %d\n", game->score));
     int level = game->score / 1000 + 1;
     if(game->level != level){
         game->level = level;
         _speed_up(game);
         game->ui->draw_level(game->ui);
     }
+    DEBUG_WRITE(("_check_level_up end\n"));
 }
 
 void _check_eliminate(GAME *game){
     DEBUG_WRITE(("_check_eliminate begin\n"));
-    int row, lines = 0;
+    int row, lines_size = 0;
+    int lines[4];
     for(row = 0; row < ROWS; row++){
         if(_all_cols_be_filled(game->panel, row)){
-            lines++;
+            lines[lines_size] = row;
+            lines_size++;
             _eliminate(game->panel, row);
         }
     }
-    if(lines > 0){
-        game->score += _calc_score(lines);
+    if(lines_size > 0){
+        game->score += _calc_score(lines_size);
         _check_level_up(game);
         game->ui->draw_score(game->ui);
-        game->ui->draw_panel(game->ui);
+        game->ui->draw_eliminate(game->ui, lines, lines_size);
     }
-    DEBUG_WRITE(("_check_eliminate end: [lines]\n", lines));
+    DEBUG_WRITE(("_check_eliminate end: [lines_size]\n", lines_size));
 }
 
 

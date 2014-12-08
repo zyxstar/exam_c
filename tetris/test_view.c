@@ -30,7 +30,9 @@ void test_view(){
     BLOCK b2 = _init_block('O', 1);
     draw_next_block(FRM_TOP, 45, &b2);
     draw_panel_block(FRM_TOP, 45, &b2);
+    int lines[] = {4,6,7};
     draw_panel(FRM_TOP, 45, panel);
+    draw_highlight(FRM_TOP, 45, lines, 3);
     draw_running(FRM_TOP, 45);
 
     reset_tty();
@@ -44,4 +46,4 @@ int main(){
 }
 
 
-// gcc -I ../utils ../utils/utils.c game.c view.c test_view.c -o test_view.out && ./test_view.out
+// gcc -I ../utils ../utils/utils.c game.c view.c test_view.c -o test_view.out -lm -lpthread && ./test_view.out

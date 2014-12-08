@@ -28,6 +28,6 @@ int main(){
 }
 
 
-// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c double_player.c -o double_player.out -lpthread -DDEBUG && ./double_player.out 2>>debug.log
+// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c double_player.c -o double_player.out -lm -lpthread -DDEBUG && ./double_player.out 2>>debug.log
 
-// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c double_player.c -o double_player.out -lpthread && ./double_player.out
+// gcc -I ../utils ../utils/utils.c game.c view.c tetris.c double_player.c -o double_player.out -lm -lpthread && ./double_player.out

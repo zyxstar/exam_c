@@ -46,7 +46,7 @@ void _print_block(BLOCK *b){
 }
 
 void _print_game(GAME *game){
-    printf("\nGAME: [sroce]%d, [draw_view]%p, [next]%c%d\n", game->score, game->draw_view, game->next_block.type, game->next_block.turn_idx);
+    printf("\nGAME: [sroce]%d, [ui]%p, [next]%c%d\n", game->score, game->ui, game->next_block.type, game->next_block.turn_idx);
     _print_block(&game->cur_block);
     _print_panel(game->panel);
 }
@@ -67,9 +67,17 @@ void each_type_do(void(*callback)(char type)){
 int GLOBAL_PANEL[ROWS][COLS] = {0};
 
 
-void _draw_view(GAME* game){
-    _print_game(game);
+
+
+void _draw_view(GAME_UI *ui){
+    _print_game(ui->game);
 }
+void _draw_change(BLOCK *last, GAME_UI *ui){
+    _print_game(ui->game);
+}
+
+GAME_UI ui={0, NULL, _draw_view, _draw_view, _draw_view, _draw_view,
+      _draw_change, _draw_view, _draw_view, _draw_view, _draw_view};
 
 ////////////////////////////////////////
 ///test_init
@@ -106,7 +114,7 @@ void test_rand_block(){
 }
 
 void test_init_game(){
-    GAME* game = init_game(_draw_view);
+    GAME* game = game_init(&ui);
     _print_game(game);
 }
 
@@ -115,9 +123,10 @@ void test_init_game(){
 ////////////////////////////////////////
 
 void _test_move(char type, char *direction_str, BOOL(*func)(GAME*) ,int times){
-    GAME *game = init_game(_draw_view);
-
+    GAME *game = game_init(&ui);
+    ui.game = game;
     BLOCK b = _init_block(type, 0);
+    timer_destroy(&game->timer);
     game->cur_block = b;
     game->panel = (PANEL)GLOBAL_PANEL;
 
@@ -134,16 +143,16 @@ void _test_move(char type, char *direction_str, BOOL(*func)(GAME*) ,int times){
 }
 
 void test_move_left(char type){
-    _test_move(type, "left", move_left, 10);
+    _test_move(type, "left", game_move_left, 10);
 }
 
 void test_move_right(char type){
-    _test_move(type, "right", move_right, 10);
+    _test_move(type, "right", game_move_right, 10);
 }
 
 void test_move_with_filled(char type){
     GLOBAL_PANEL[1][1] = FILLED;
-    _test_move(type, "left", move_left, 20);
+    _test_move(type, "left",game_move_left, 20);
 }
 
 
@@ -152,9 +161,10 @@ void test_move_with_filled(char type){
 ////////////////////////////////////////
 
 void test_turn_block(char type){
-    GAME *game = init_game(_draw_view);
-
+    GAME *game = game_init(&ui);
+    ui.game = game;
     BLOCK b = _init_block(type, 0);
+    timer_destroy(&game->timer);
     game->cur_block = b;
     game->panel = (PANEL)GLOBAL_PANEL;
 
@@ -163,7 +173,7 @@ void test_turn_block(char type){
     BOOL ret;
     for(i = 0; i < 4; i++){
         turn_idx = game->cur_block.turn_idx;
-        ret = turn(game);
+        ret = game_turn(game);
         printf("%c[%d] turn[%d] %s\n",
             game->cur_block.type, turn_idx, i, human_bool(ret));
         if(!ret) break;
@@ -182,17 +192,22 @@ void test_turn_block_filled(char type){
 ////////////////////////////////////////
 
 void test_panel_be_filled(char type){
-    GAME *game = init_game(_draw_view);
+    GAME *game = game_init(&ui);
+    ui.game = game;
     BLOCK b = _init_block(type, 0);
+    timer_destroy(&game->timer);
     game->cur_block = b;
     game->panel = (PANEL)GLOBAL_PANEL;
-    game->draw_view(game);
+
+    // _print_game(game);
     _panel_be_filled(game);
-    _begin_next_frame(game);
+    // _begin_next(game);
 }
 
 void test_check_eliminate(){
-    GAME *game = init_game(_draw_view);
+    GAME *game = game_init(&ui);
+    ui.game = game;
+    timer_destroy(&game->timer);
     game->panel = (PANEL)GLOBAL_PANEL;
 
     game->panel[0][5] = FILLED;
@@ -203,37 +218,37 @@ void test_check_eliminate(){
         game->panel[5][i] = FILLED;
         game->panel[8][i] = FILLED;
     }
-    game->draw_view(game);
-    printf("lines = %d\n", _check_eliminate(game));
+    _print_game(game);
+    _check_eliminate(game);
 }
 
 
-void test_move_down(char type){
-    _test_move(type, "down", move_down, 20);
-}
+// void test_move_down(char type){
+//     _test_move(type, "down", move_down, 20);
+// }
 
 
-void test_move_turn(){
-    GAME *game = init_game(_draw_view);
-    game->panel = (PANEL)GLOBAL_PANEL;
-    BLOCK b = _init_block('O', 0);
-    game->cur_block = b;
+// void test_move_turn(){
+//     GAME *game = init_game(_draw_view);
+//     game->panel = (PANEL)GLOBAL_PANEL;
+//     BLOCK b = _init_block('O', 0);
+//     game->cur_block = b;
 
-    move_down(game);
-    move_left(game);
-    move_left(game);
-    move_left(game);
-    move_left(game);
-    turn(game);
+//     move_down(game);
+//     move_left(game);
+//     move_left(game);
+//     move_left(game);
+//     move_left(game);
+//     turn(game);
 
-}
+// }
 
-void test_game_over(){
-    GAME *game = init_game(_draw_view);
-    int i;
-    for(i = 0; i < 100; i++)
-        move_down(game);
-}
+// void test_game_over(){
+//     GAME *game = init_game(_draw_view);
+//     int i;
+//     for(i = 0; i < 100; i++)
+//         move_down(game);
+// }
 
 
 int main(int argc, const char* argv[]){
@@ -257,11 +272,11 @@ int main(int argc, const char* argv[]){
 
     // each_type_do(test_panel_be_filled);
 
-    // test_check_eliminate();
+    test_check_eliminate();
 
     // each_type_do(test_move_down);
 
-    test_move_turn();
+    // test_move_turn();
 
     // test_game_over();
 
@@ -269,5 +284,5 @@ int main(int argc, const char* argv[]){
     return 0;
 }
 
-// gcc -I ../utils ../utils/utils.c test.c game.c -o test.out -DDEBUG && ./test.out
-// gcc -I ../utils ../utils/utils.c test.c game.c -o test.out && ./test.out
+// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out -DDEBUG && ./test_game.out
+// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out && ./test_game.out > test.log

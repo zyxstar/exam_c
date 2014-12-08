@@ -46,14 +46,14 @@ static void _draw_operator(int frame_top, int frame_left, int top, char *operato
 }
 
 
-void draw_frame(int top, int left, char turn_cd, char left_cd, char right_cd, char down_cd){
+void draw_frame(int top, int left, char turn_cd, char left_cd, char right_cd, char down_cd, char pause_cd){
     _draw_rect(top, left, FRM_WID, FRM_HEI, VT_BG_BLUE);
     _draw_rect(top, left + FRM_WID, FRM_EX_WID, FRM_HEI, VT_BG_BLUE);
     _draw_operator(top, left, 14, "turn", turn_cd);
     _draw_operator(top, left, 15, "left", left_cd);
     _draw_operator(top, left, 16, "rignt", right_cd);
     _draw_operator(top, left, 17, "down", down_cd);
-    _draw_operator(top, left, 18, "pause", 'p');
+    _draw_operator(top, left, 18, "pause", pause_cd);
     _draw_operator(top, left, 19, "quit", 'q');
 }
 
@@ -128,51 +128,6 @@ void voice(){
     printf("%c", 7);
     fflush(NULL);
 }
-
-
-// void _test(){
-//     clear_tty();
-//     PANEL panel = _init_panel();
-//     panel[0][1]=FILLED;
-//     panel[1][1]=FILLED;
-//     panel[5][5]=FILLED;
-//     panel[6][6]=FILLED;
-//     panel[11][6]=FILLED;
-//     panel[12][6]=FILLED;
-//     panel[13][6]=FILLED;
-//     panel[14][6]=FILLED;
-//     panel[15][6]=FILLED;
-//     panel[19][9]=FILLED;
-
-//     draw_frame(FRM_TOP, 5, 'w','a','d','s');
-//     draw_level(FRM_TOP, 5, 2);
-//     draw_score(FRM_TOP, 5, 1200);
-//     BLOCK b = _init_block('T', 0);
-//     draw_next_block(FRM_TOP, 5, &b);
-//     draw_panel_block(FRM_TOP, 5, &b);
-//     draw_panel(FRM_TOP, 5, panel);
-
-
-//     draw_frame(FRM_TOP, 45, 'i','j','l','k');
-//     draw_level(FRM_TOP, 45, 3);
-//     draw_score(FRM_TOP, 45, 800);
-//     BLOCK b2 = _init_block('O', 1);
-//     draw_next_block(FRM_TOP, 45, &b2);
-//     draw_panel_block(FRM_TOP, 45, &b2);
-//     draw_panel(FRM_TOP, 45, panel);
-
-//     // while(1);
-
-//     reset_tty();
-
-// }
-
-
-// int main(){_test();return 0;}
-
-
-// gcc -I ../utils ../utils/utils.c game.c view.c -o view.out && ./view.out
-
 
 
 

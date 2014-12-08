@@ -46,19 +46,19 @@ void key_press_loop(PRESS_HANDLER *handlers, int size){
     while((ch = getchar()) != 'q'){
         for(i = 0; i < size; i++)
             if(handlers[i].op == ch){
-                handlers[i].call(handlers[i].game);
+                handlers[i].action(handlers[i].game);
             }
         fflush(NULL);
     }
 }
 
-void register_press_handler(char op, GAME* game, GAME_CALL call, PRESS_HANDLER *handlers, int *size){
-    PRESS_HANDLER h = {op, game, call};
+void register_press_handler(char op, GAME* game, GAME_ACTION action, PRESS_HANDLER *handlers, int *size){
+    PRESS_HANDLER h = {op, game, action};
     handlers[*size] = h;
     *size += 1;
 }
 
-GAME* game_facade(GAME_UI *ui, int frame_left, 
+GAME* game_facade(GAME_UI *ui, int frame_left,
                  char turn_cd, char left_cd, char right_cd, char down_cd, char pause_cd,
                  PRESS_HANDLER *handlers, int *size){
 
@@ -75,13 +75,13 @@ GAME* game_facade(GAME_UI *ui, int frame_left,
     ui->draw_running = _draw_running_fn;
     ui->draw_game_over = _draw_game_over_fn;
 
-    draw_frame(FRM_TOP, frame_left, turn_cd, left_cd, right_cd, down_cd);
+    draw_frame(FRM_TOP, frame_left, turn_cd, left_cd, right_cd, down_cd, pause_cd);
 
-    register_press_handler(turn_cd, game, (GAME_CALL)game_turn, handlers, size);
-    register_press_handler(left_cd, game, (GAME_CALL)game_move_left, handlers, size);
-    register_press_handler(right_cd, game, (GAME_CALL)game_move_right, handlers, size);
-    register_press_handler(down_cd, game, (GAME_CALL)game_move_down, handlers, size);
-    register_press_handler(pause_cd, game, (GAME_CALL)game_pause, handlers, size);
+    register_press_handler(turn_cd, game, (GAME_ACTION)game_turn, handlers, size);
+    register_press_handler(left_cd, game, (GAME_ACTION)game_move_left, handlers, size);
+    register_press_handler(right_cd, game, (GAME_ACTION)game_move_right, handlers, size);
+    register_press_handler(down_cd, game, (GAME_ACTION)game_move_down, handlers, size);
+    register_press_handler(pause_cd, game, (GAME_ACTION)game_pause, handlers, size);
 
     return game;
 }

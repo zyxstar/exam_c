@@ -90,7 +90,7 @@ BLOCK _init_block(char type, int turn_idx); //type in "TOILJSZ"
 BLOCK _rand_block();
 
 void _panel_be_filled(GAME *game);
-void _begin_next_frame(GAME *game);
+void _begin_next(GAME *game);
 void _check_eliminate(GAME *game);
 
 

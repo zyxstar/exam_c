@@ -7,7 +7,7 @@
     + `vt_code`，`termios`的相关封装，参考了网上的例子
 - __模型层__：`BLOCK`，`GAME`的实现，它们只有逻辑部分，不包含UI交互
     + 它们可被单独测试，测试代码在`test_game.c`中
-    + 它们不依赖于具体的UI技术，能完成`GAME_UI`适配即可
+    + 它们不依赖于具体的UI技术，比如使用qt，只需能完成`GAME_UI`适配即可
     + 高层函数，即开放在`game.h`中的，抽象一致，并且所有逻辑判断不超过两层，基本达到可读性
     + 计分规则`_calc_score`、升级规则`_check_level_up`、加速规则`_speed_up`等由单独函数来完成，方便修改
     + 使用了`mutex`，防止在手工的与`timer`激发的`move_down`动作同时发生时，产生资源竞争，导致数据不一致
@@ -20,4 +20,5 @@
     + `tetris.c`，接收UI的交互（键盘输入），并将行为委托给模型层的具体方法。
     + 模型层发生的变化，借由`GAME_UI`来绘制UI，后者承担`GAME`与`view`之间的联系，由一系列函数指针组成的结构体，充担高级语言中的接口的概念
 - 避免了全局变量的存在，方便在单人应用`single_player`与双人应用`double_player`使用同一套逻辑
+
 > 运行时监控，`gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lpthread -DDEBUG && ./single_player.out 2>>debug.log`，并同时启动`tail f debug.log`

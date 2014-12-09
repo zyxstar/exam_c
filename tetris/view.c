@@ -107,22 +107,21 @@ void draw_panel(int frame_top, int frame_left, PANEL panel){
     DEBUG_WRITE(("draw_panel end\n"));
 }
 
-void draw_highlight(int frame_top, int frame_left, int *lines, int lines_size){
+static void _draw_highlight(int frame_top, int frame_left, int *lines, int lines_size, char *bg_color){
     int i, col;
     int base_x = frame_left + 2;
     int base_y = frame_top + 2;
     for(i = 0; i < lines_size; i++)
         for(col = 0; col < COLS; col++)
-            _draw_text(base_x + col * 2, base_y + lines[i], "[]", VT_GRAY, VT_BG_RED);
+            _draw_text(base_x + col * 2, base_y + lines[i], "[]", VT_GRAY, bg_color);
+}
+
+void draw_highlight(int frame_top, int frame_left, int *lines, int lines_size){
+    _draw_highlight(frame_top, frame_left, lines, lines_size, VT_BG_BLUE);
 }
 
 void erase_highlight(int frame_top, int frame_left, int *lines, int lines_size){
-    int i, col;
-    int base_x = frame_left + 2;
-    int base_y = frame_top + 2;
-    for(i = 0; i < lines_size; i++)
-        for(col = 0; col < COLS; col++)
-            _draw_text(base_x + col * 2, base_y + lines[i], "[]", VT_GRAY, VT_BG_NONE);
+    _draw_highlight(frame_top, frame_left, lines, lines_size, VT_BG_NONE);
 }
 
 

@@ -309,12 +309,12 @@ void _check_eliminate(GAME *game){
         game->ui->draw_score(game->ui);
         game->ui->draw_eliminate(game->ui, lines, lines_size);
     }
-    DEBUG_WRITE(("_check_eliminate end: [lines_size]\n", lines_size));
+    DEBUG_WRITE(("_check_eliminate end: [lines_size]%d\n", lines_size));
 }
 
 
 static BOOL _check_game_over(GAME *game){
-    DEBUG_WRITE(("_check_game_over: [down_count]\n", game->cur_block.down_count));
+    DEBUG_WRITE(("_check_game_over: [down_count]%d\n", game->cur_block.down_count));
     return game->cur_block.down_count == 0;
 }
 

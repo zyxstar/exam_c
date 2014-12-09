@@ -26,22 +26,25 @@ void _draw_panel_fn(GAME_UI *ui){
 }
 
 void _ui_timer_call(void *env){// implement animation
-    GAME_UI *ui = (GAME_UI*)((void**)env[0]);
+    GAME_UI *ui = (GAME_UI*)((void**)env)[0];
     if(ui->timer.interval == 0) return;
 
-    int *data = (int*)((void **)env[1]);
+    int *data = (int*)((void **)env)[1];
     int lines_size = data[0];
     int *lines = &data[1];
 
     switch(ui->tick_count){
         case 0:
             draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            ui->tick_count++;
             break;
         case 1:
             erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            ui->tick_count++;
             break;
         case 2:
             draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            ui->tick_count++;
             break;
         case 3:
             timer_stop(&ui->timer);
@@ -55,16 +58,18 @@ void _ui_timer_call(void *env){// implement animation
 }
 
 void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){
-    void **env = malloc(sizeof(void*) * 2);
-    env[0] = ui;
-    env[1] = malloc(sizeof(int*) * lines_size + 1);
-    env[1][0] = lines_size;
+    int *data = malloc(sizeof(int*) * lines_size + 1);
+    data[0] = lines_size;
     int i;
     for(i = 1; i < lines_size + 1; i++)
-        env[1][i] = lines[i-1];
+        data[i] = lines[i-1];
+
+    void **env = malloc(sizeof(void*) * 2);
+    env[0] = ui;
+    env[1] = data;
 
     ui->timer.env = env;
-    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 30);
+    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 20);
     timer_start(&ui->timer);
 }
 

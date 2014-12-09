@@ -39,6 +39,7 @@ typedef struct GAME_TAG GAME;
 typedef struct GAME_UI_TAG{
     int frame_left;
     SIMPER_TIMER timer;
+    int tick_count;
     GAME *game;
 
     void(*draw_level)(struct GAME_UI_TAG*);

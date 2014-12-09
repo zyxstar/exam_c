@@ -76,7 +76,7 @@ void _draw_change(BLOCK *last, GAME_UI *ui){
     _print_game(ui->game);
 }
 
-GAME_UI ui={0, {0}, NULL, _draw_view, _draw_view, _draw_view, _draw_view,
+GAME_UI ui={0, {0}, 0, NULL, _draw_view, _draw_view, _draw_view, _draw_view,
       _draw_change, _draw_view, _draw_view, _draw_view, _draw_view};
 
 ////////////////////////////////////////

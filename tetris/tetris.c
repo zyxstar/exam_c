@@ -25,17 +25,46 @@ void _draw_panel_fn(GAME_UI *ui){
     draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
 }
 
-void _ui_timer_call(void *env){
-    GAME_UI *ui = (GAME_UI*)env;
+void _ui_timer_call(void *env){// implement animation
+    GAME_UI *ui = (GAME_UI*)((void**)env[0]);
     if(ui->timer.interval == 0) return;
-    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 10);
-    timer_stop(&ui->timer);
-    draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
-    draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);
+
+    int *data = (int*)((void **)env[1]);
+    int lines_size = data[0];
+    int *lines = &data[1];
+
+    switch(ui->tick_count){
+        case 0:
+            draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            break;
+        case 1:
+            erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            break;
+        case 2:
+            draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            break;
+        case 3:
+            timer_stop(&ui->timer);
+            draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
+            draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);
+            ui->tick_count = 0;
+            free(data);
+            free(env);
+            break;
+    }
 }
 
 void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){
-    draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+    void **env = malloc(sizeof(void*) * 2);
+    env[0] = ui;
+    env[1] = malloc(sizeof(int*) * lines_size + 1);
+    env[1][0] = lines_size;
+    int i;
+    for(i = 1; i < lines_size + 1; i++)
+        env[1][i] = lines[i-1];
+
+    ui->timer.env = env;
+    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 30);
     timer_start(&ui->timer);
 }
 
@@ -79,7 +108,8 @@ GAME* game_facade(GAME_UI *ui, int frame_left,
 
     GAME *game = game_init(ui);
     ui->game = game;
-    timer_new(&ui->timer, 100, _ui_timer_call, ui);
+    ui->tick_count = 0;
+    timer_new(&ui->timer, 100, _ui_timer_call, NULL);
     ui->frame_left = frame_left;
     ui->draw_level = _draw_level_fn;
     ui->draw_score = _draw_score_fn;

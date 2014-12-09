@@ -1,15 +1,20 @@
-#include "exam.h"
+#include <stdio.h>
 
 
+void call(){
+    printf("ddd ");
+}
 
 
+typedef int(*FUN)();
 
-int main(){
+int main(void){
+   int a=1;
+   FUN f = (FUN)call;
+   int b=2;
+   printf("%d\n",f());
 
-  struct tag t;
-  t.name = 20;
- 
-  return 0;
+   return 0;
 
 }
 

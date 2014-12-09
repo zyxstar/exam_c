@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 int fun(int n)
 {
 	int sum=0;

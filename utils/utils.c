@@ -95,14 +95,25 @@ void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *nam
 }
 
 void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env){
-    if(GLOBAL_TIMER_QUEUE.size == 64) return;
+
     timer->interval = 0;
     timer->const_interval = interval;
     timer->count = 0;
     timer->callee_fn = callee_fn;
     timer->env = env;
-    GLOBAL_TIMER_QUEUE.timer_queue[GLOBAL_TIMER_QUEUE.size] = timer;
-    GLOBAL_TIMER_QUEUE.size++;
+
+    int i;
+    for(i = 0; i < GLOBAL_TIMER_QUEUE.size; i++){
+        if(GLOBAL_TIMER_QUEUE.timer_queue[i] == NULL){
+            GLOBAL_TIMER_QUEUE.timer_queue[i] = timer;
+            break;
+        }
+    }
+    if(i == GLOBAL_TIMER_QUEUE.size){
+        if(GLOBAL_TIMER_QUEUE.size == 64) return;
+        GLOBAL_TIMER_QUEUE.timer_queue[GLOBAL_TIMER_QUEUE.size] = timer;
+        GLOBAL_TIMER_QUEUE.size++;
+    }
     DEBUG_WRITE(("timer_new: [callee_name]%s [interval]%d\n", timer->callee_name, timer->interval));
 }
 

@@ -7,7 +7,7 @@ int main(){
     srand(time(NULL));
 
     int size = 0;
-    PRESS_HANDLER handlers[20];    
+    PRESS_HANDLER handlers[20];
 
     GAME_UI ui1;
     GAME *game1 = game_facade(&ui1, 5, 'w','a','d','s','p', handlers, &size);
@@ -20,6 +20,8 @@ int main(){
 
     key_press_loop(handlers, size);
 
+    timer_destroy(&ui1.timer);
+    timer_destroy(&ui2.timer);
     game_destroy(game1);
     game_destroy(game2);
 

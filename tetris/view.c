@@ -94,7 +94,7 @@ void erase_panel_block(int frame_top, int frame_left, BLOCK *block){
 
 
 void draw_panel(int frame_top, int frame_left, PANEL panel){
-    DEBUG_WRITE(("draw_panel begin\n"));    
+    DEBUG_WRITE(("draw_panel begin\n"));
     int row, col;
     int base_x = frame_left + 2;
     int base_y = frame_top + 2;
@@ -104,7 +104,7 @@ void draw_panel(int frame_top, int frame_left, PANEL panel){
                 _draw_text(base_x + col * 2, base_y + row, "[]", VT_GRAY, VT_BG_PURPLE);
             else
                 _draw_text(base_x + col * 2, base_y + row, "  ", VT_GRAY, VT_BG_NONE);
-    DEBUG_WRITE(("draw_panel end\n")); 
+    DEBUG_WRITE(("draw_panel end\n"));
 }
 
 void draw_highlight(int frame_top, int frame_left, int *lines, int lines_size){
@@ -115,6 +115,16 @@ void draw_highlight(int frame_top, int frame_left, int *lines, int lines_size){
         for(col = 0; col < COLS; col++)
             _draw_text(base_x + col * 2, base_y + lines[i], "[]", VT_GRAY, VT_BG_RED);
 }
+
+void erase_highlight(int frame_top, int frame_left, int *lines, int lines_size){
+    int i, col;
+    int base_x = frame_left + 2;
+    int base_y = frame_top + 2;
+    for(i = 0; i < lines_size; i++)
+        for(col = 0; col < COLS; col++)
+            _draw_text(base_x + col * 2, base_y + lines[i], "[]", VT_GRAY, VT_BG_NONE);
+}
+
 
 static void _draw_tip(int frame_top, int frame_left, char *text){
     char str[12];

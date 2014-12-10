@@ -17,8 +17,8 @@
 - __视图层__：`view.c`存放具体的UI绘制的部分，它依赖于工具类中的`vt_code`
     + 它也可被单独运行，在`test_view.c`中用于测试单个绘制是否有效
 - __控制层__：
-    + `tetris.c`，接收UI的交互（键盘输入），并将行为委托给模型层的具体方法。
+    + `ctrl.c`，接收UI的交互（键盘输入），并将行为委托给模型层的具体方法。
     + 模型层发生的变化，借由`GAME_UI`来绘制UI，后者承担`GAME`与`view`之间的联系，由一系列函数指针组成的结构体，充担高级语言中的接口的概念
-- 避免了全局变量的存在，方便在单人应用`single_player`与双人应用`double_player`使用同一套逻辑
+- 避免了全局变量的存在，方便在单人应用`tetris_single`与双人应用`tetris_double`使用同一套逻辑
 
-> 运行时监控，`gcc -I ../utils ../utils/utils.c game.c view.c tetris.c single_player.c -o single_player.out -lm -lpthread -DDEBUG && ./single_player.out 2>>debug.log`，并同时启动`tail f debug.log`
+> 运行时监控，`gcc -I ../utils ../utils/utils.c game.c view.c ctrl.c tetris_single.c -o tetris_single.out -lm -lpthread -DDEBUG && ./tetris_single.out 2>>debug.log`，并同时启动`tail f debug.log`

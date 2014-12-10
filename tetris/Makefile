@@ -27,7 +27,7 @@ game.o: game.c
 utils.o: $(IDIR)/utils.c
 	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
-clean_single:
+clean:
 	rm $(OBJECTS) tetris_single.o tetris_single
 
 clean_double:

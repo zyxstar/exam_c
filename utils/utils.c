@@ -8,11 +8,13 @@
 #include <termios.h>
 #include "utils.h"
 
+#define FORMAT_LEN (1024)
+
 void debug_write(char *format, ...){
     va_list ap;
     va_start(ap, format);
-    char new_format[1024];
-    sprintf(new_format, VT_RESET "\033[35m#DEBUG# %s" VT_RESET, format);
+    char new_format[FORMAT_LEN];
+    snprintf(new_format, FORMAT_LEN, VT_RESET "\033[35m#DEBUG# %s" VT_RESET, format);
     vfprintf(stderr, new_format, ap);
     va_end(ap);
 }
@@ -20,8 +22,8 @@ void debug_write(char *format, ...){
 void printf_correct(char *format, ...){
     va_list ap;
     va_start(ap, format);
-    char new_format[1024];
-    sprintf(new_format, VT_RESET VT_GREEN "%s" VT_RESET, format);
+    char new_format[FORMAT_LEN];
+    snprintf(new_format, FORMAT_LEN, VT_RESET VT_GREEN "%s" VT_RESET, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }
@@ -29,8 +31,8 @@ void printf_correct(char *format, ...){
 void printf_error(char *format, ...){
     va_list ap;
     va_start(ap, format);
-    char new_format[1024];
-    sprintf(new_format, VT_RESET VT_RED "%s" VT_RESET, format);
+    char new_format[FORMAT_LEN];
+    snprintf(new_format, FORMAT_LEN, VT_RESET VT_RED "%s" VT_RESET, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }
@@ -38,8 +40,8 @@ void printf_error(char *format, ...){
 void printf_info(char *format, ...){
     va_list ap;
     va_start(ap, format);
-    char new_format[1024];
-    sprintf(new_format, VT_RESET VT_YELLOW "%s" VT_RESET, format);
+    char new_format[FORMAT_LEN];
+    snprintf(new_format, FORMAT_LEN, VT_RESET VT_YELLOW "%s" VT_RESET, format);
     vfprintf(stdout, new_format, ap);
     va_end(ap);
 }
@@ -91,7 +93,7 @@ static struct{
 } GLOBAL_TIMER_QUEUE;
 
 void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name){
-    sprintf(timer->callee_name, "%s:%d:%s", file, line, name);
+    snprintf(timer->callee_name, 256, "%s:%d:%s", file, line, name);
 }
 
 void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env){

@@ -55,11 +55,11 @@ static void _ui_timer_call(void *env){// implement animation
             erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
             ui->tick_count++;
             break;
+        // case 1:
+        //     draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+        //     ui->tick_count++;
+        //     break;
         case 1:
-            draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
-            ui->tick_count++;
-            break;
-        case 2:
             timer_stop(&ui->timer);
             draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
             draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);
@@ -83,7 +83,7 @@ static void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){
     env[1] = data;
 
     ui->timer.env = env;
-    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 10);
+    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 20);
     timer_start(&ui->timer);
 }
 

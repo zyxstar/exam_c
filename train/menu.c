@@ -112,16 +112,15 @@ static void _back_menu(MENU *root, MENU **cur_menu){// must MENU**
 
 void show_menu(MENU *root, void *env){
     MENU *cur_menu = root;
-    int op = -2;
-    // char buf[256];
+    int op;
     while(1){
         _show_cur_menu(cur_menu);
 
-        // fgets(buf, sizeof(buf), stdin);
-        // sscanf(buf, "%d", &op);
-        op = -2;
-        scanf("%d", &op);
-        getchar();
+        if(scanf("%d", &op) != 1){
+            printf_error("-> error code, choice again:\n");
+            getchar();
+            continue;
+        }
 
         if(op == -1) break;
         if(op == 0) {
@@ -130,7 +129,6 @@ void show_menu(MENU *root, void *env){
         }
 
         if(_change_menu(&cur_menu, op)){
-            //printf("_change_menu cur_menu[%s]\n", cur_menu->text);
             if(cur_menu->call_fn == NULL)
                 continue;
             else{

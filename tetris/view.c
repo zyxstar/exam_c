@@ -3,6 +3,8 @@
 #include <string.h>
 #include "view.h"
 
+#define BUF_LEN (20)
+
 void clear_tty(){
     printf(VT_CLEAR_SCREEN);
     printf(VT_HIED_CUR);
@@ -40,8 +42,8 @@ static void _draw_rect(int top, int left, int width, int heigth, char *bg_color)
 }
 
 static void _draw_operator(int frame_top, int frame_left, int top, char *operator, char cd){
-    char str[20];
-    sprintf(str, "%-5s: " VT_RED "%c", operator, cd);
+    char str[BUF_LEN];
+    snprintf(str, BUF_LEN, "%-5s: " VT_RED "%c", operator, cd);
     _draw_text(frame_left + FRM_WID + 3, frame_top + top, str, VT_DEEP VT_YELLOW, VT_BG_NONE);
 }
 
@@ -58,14 +60,14 @@ void draw_frame(int top, int left, char turn_cd, char left_cd, char right_cd, ch
 }
 
 void draw_level(int frame_top, int frame_left, int level){
-    char str[20];
-    sprintf(str, "LEVEL %d", level);
+    char str[BUF_LEN];
+    snprintf(str, BUF_LEN, "LEVEL %d", level);
     _draw_text(frame_left + FRM_WID + 3, frame_top + 3, str, VT_DEEP VT_YELLOW, VT_BG_NONE);
 }
 
 void draw_score(int frame_top, int frame_left, int score){
-    char str[20];
-    sprintf(str, VT_DEEP VT_RED "%d", score);
+    char str[BUF_LEN];
+    snprintf(str, BUF_LEN, VT_DEEP VT_RED "%d", score);
     _draw_text(frame_left + FRM_WID + 4, frame_top + 5, str, VT_DEEP VT_YELLOW, VT_BG_NONE);
 }
 
@@ -126,8 +128,8 @@ void erase_highlight(int frame_top, int frame_left, int *lines, int lines_size){
 
 
 static void _draw_tip(int frame_top, int frame_left, char *text){
-    char str[12];
-    sprintf(str, "%-11s", text);
+    char str[BUF_LEN];
+    snprintf(str, BUF_LEN, "%-11s", text);
     _draw_text(frame_left + 7, frame_top, str, VT_RED, VT_BG_NONE);
 }
 

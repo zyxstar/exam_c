@@ -1,6 +1,11 @@
 #include <stdio.h>
 
 
+struct stu
+{
+    int score;
+};
+
 void call(){
     printf("ddd ");
 }
@@ -9,10 +14,13 @@ void call(){
 typedef int(*FUN)();
 
 int main(void){
-   int a=1;
-   FUN f = (FUN)call;
-   int b=2;
-   printf("%d\n",f());
+   struct stu s1={10};
+   struct stu s2={10};
+   // printf("%d\n", s1-s2);
+
+   char *name = "abcd";
+
+   printf("%c\n", *name);
 
    return 0;
 
@@ -25,5 +33,5 @@ int main(void){
 
 
 //gcc exam.c -E -o exam.i
-//gcc exam.c -o exam.out
+//gcc exam.c -o exam.out && ./exam.out
 

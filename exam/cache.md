@@ -50,3 +50,38 @@ memset
 NULL == (void*)0
 
 
+
+返回所有符合条件
+  定义子函数 内部static
+  外部函数多次调用，直到全部找到，子函数内部static一直增加内容
+  子函数定义的 static 作为外函数的 二级指针 参数
+
+
+
+
+int find(DARR head, void *key, cmp, void **finddatas)
+外部需要 free
+
+
+最小指针模型
+const char * const * const p = n
+
+看const修饰 p or *p
+
+线性表 宏
+
+
+句柄 的改变 一般使用二级指针 形参改实参的值
+（一般不会改变）
+
+
+
+
+
+#define ARR_SIZE(arr) sizeof(arr) / sizeof(*arr)
+
+
+   struct stu s = {};
+
+
+

@@ -26,8 +26,23 @@ int main(void)
 
       LIST_HEAD(list);
 
+      for (i = 0; i < 7; i++) {
+        datap = malloc(sizeof(*datap));
+        /* if error */
 
-      list_add(&datap->node, &list);
+        datap->id = i;
+        datap->math = 100 - i;
+        snprintf(datap->name, NAMESIZE, "stu%d", i);
+
+        list_add(&datap->node, &list);
+      }
+
+      __list_for_each(cur, &list) {
+        datap = list_entry(cur, struct score, node);
+        print_s(datap);
+      }
+
+
 
       return 0;
 }

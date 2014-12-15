@@ -50,24 +50,24 @@ static void _ui_timer_call(void *env){// implement animation
     int lines_size = data[0];
     int *lines = &data[1];
 
-    switch(ui->tick_count){
-        case 0:
-            erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
-            ui->tick_count++;
-            break;
-        case 1:
-            draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
-            ui->tick_count++;
-            break;
-        case 2:
+    // switch(ui->tick_count){
+    //     case 0:
+    //         erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+    //         ui->tick_count++;
+    //         break;
+    //     case 1:
+    //         draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+    //         ui->tick_count++;
+    //         break;
+        // case 2:
             timer_stop(&ui->timer);
             draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
             draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);
             ui->tick_count = 0;
             free(data);
             free(env);
-            break;
-    }
+    //         break;
+    // }
 }
 
 static void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){

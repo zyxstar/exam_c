@@ -1,6 +1,8 @@
 #ifndef HS_KERNEL_LIST_H
 #define HS_KERNEL_LIST_H
 
+///lib/modules/3.2.0-23-generic-pae/build/include/linux
+
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 #define container_of(ptr, type, member) \

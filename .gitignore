@@ -4,5 +4,7 @@
 *.out
 *.result
 *.log
+*.swp
 
 
+/exam

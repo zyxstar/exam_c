@@ -8,9 +8,9 @@ int main(){
     srand(time(NULL));
 
     int frame_left1 = 3;
-    char *cd1 = "wadsp";
+    char *cd1[] = {"w","a","d","s","p"};
     int frame_left2 = 42;
-    char *cd2 = "ijlkp";
+    char *cd2[] = {"i","j","l","k","p"};
 
     GAME_UI *ui1 = ui_init(frame_left1, cd1);
     GAME *game1 = game_init(ui1);

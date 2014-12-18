@@ -10,7 +10,7 @@ struct stat{
 
 def_reduce(_reduce1, int, int);
 
-_reduce2 = def_reduce(char, struct stat);
+def_reduce(_reduce2, char, struct stat);
 
 void add(int *acc, int b, int idx){ *acc += b;}
 

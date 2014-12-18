@@ -50,24 +50,24 @@ static void _ui_timer_call(void *env){// implement animation
     int lines_size = data[0];
     int *lines = &data[1];
 
-    // switch(ui->tick_count){
-    //     case 0:
-    //         erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
-    //         ui->tick_count++;
-    //         break;
-    //     case 1:
-    //         draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
-    //         ui->tick_count++;
-    //         break;
-        // case 2:
+    switch(ui->tick_count){
+        case 0:
+            erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            ui->tick_count++;
+            break;
+        // case 1:
+        //     draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+        //     ui->tick_count++;
+        //     break;
+        case 1:
             timer_stop(&ui->timer);
             draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
             draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);
             ui->tick_count = 0;
             free(data);
             free(env);
-    //         break;
-    // }
+            break;
+    }
 }
 
 static void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){
@@ -83,11 +83,11 @@ static void _draw_eliminate_fn(GAME_UI *ui, int *lines, int lines_size){
     env[1] = data;
 
     ui->timer.env = env;
-    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 10);
+    timer_set_interval(&ui->timer, ui->game->timer.const_interval / 20);
     timer_start(&ui->timer);
 }
 
-GAME_UI* ui_init(int frame_left, char *cd){
+GAME_UI* ui_init(int frame_left, char **cd){
     GAME_UI *ui = malloc(sizeof(GAME_UI));
     ui->tick_count = 0;
     ui->game = NULL;
@@ -120,12 +120,12 @@ static void register_press_handler(char op, GAME* game, GAME_ACTION action, PRES
     *size += 1;
 }
 
-void bind_press_handlers(GAME *game, char *cd, PRESS_HANDLER *handlers, int *size){
-    register_press_handler(cd[0], game, (GAME_ACTION)game_turn, handlers, size);
-    register_press_handler(cd[1], game, (GAME_ACTION)game_move_left, handlers, size);
-    register_press_handler(cd[2], game, (GAME_ACTION)game_move_right, handlers, size);
-    register_press_handler(cd[3], game, (GAME_ACTION)game_move_down, handlers, size);
-    register_press_handler(cd[4], game, game_pause, handlers, size);
+void bind_press_handlers(GAME *game, char **cd, PRESS_HANDLER *handlers, int *size){
+    register_press_handler(cd[0][0], game, (GAME_ACTION)game_turn, handlers, size);
+    register_press_handler(cd[1][0], game, (GAME_ACTION)game_move_left, handlers, size);
+    register_press_handler(cd[2][0], game, (GAME_ACTION)game_move_right, handlers, size);
+    register_press_handler(cd[3][0], game, (GAME_ACTION)game_move_down, handlers, size);
+    register_press_handler(cd[4][0], game, game_pause, handlers, size);
 }
 
 void key_press_loop(PRESS_HANDLER *handlers, int size){

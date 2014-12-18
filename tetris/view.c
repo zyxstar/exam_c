@@ -41,14 +41,14 @@ static void _draw_rect(int top, int left, int width, int heigth, char *bg_color)
     }
 }
 
-static void _draw_operator(int frame_top, int frame_left, int top, char *operator, char cd){
+static void _draw_operator(int frame_top, int frame_left, int top, char *operator, char *cd){
     char str[BUF_LEN];
-    snprintf(str, BUF_LEN, "%-5s: " VT_RED "%c", operator, cd);
+    snprintf(str, BUF_LEN, "%-5s: " VT_RED "%s", operator, cd);
     _draw_text(frame_left + FRM_WID + 3, frame_top + top, str, VT_DEEP VT_YELLOW, VT_BG_NONE);
 }
 
 
-void draw_frame(int top, int left, char turn_cd, char left_cd, char right_cd, char down_cd, char pause_cd){
+void draw_frame(int top, int left, char *turn_cd, char *left_cd, char *right_cd, char *down_cd, char *pause_cd){
     _draw_rect(top, left, FRM_WID, FRM_HEI, VT_BG_BLUE);
     _draw_rect(top, left + FRM_WID, FRM_EX_WID, FRM_HEI, VT_BG_BLUE);
     _draw_operator(top, left, 14, "turn", turn_cd);
@@ -56,7 +56,7 @@ void draw_frame(int top, int left, char turn_cd, char left_cd, char right_cd, ch
     _draw_operator(top, left, 16, "rignt", right_cd);
     _draw_operator(top, left, 17, "down", down_cd);
     _draw_operator(top, left, 18, "pause", pause_cd);
-    _draw_operator(top, left, 19, "quit", 'q');
+    _draw_operator(top, left, 19, "quit", "q");
 }
 
 void draw_level(int frame_top, int frame_left, int level){

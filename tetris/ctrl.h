@@ -9,11 +9,11 @@ typedef struct {
 } PRESS_HANDLER;
 
 
-GAME_UI* ui_init();
+GAME_UI* ui_init(int frame_left, char **cd);
 void ui_destroy(GAME_UI *ui);
 
 //cd order: `turn left right down pause`
-void bind_press_handlers(GAME *game, char *cd, PRESS_HANDLER *handlers, int *size);
+void bind_press_handlers(GAME *game, char **cd, PRESS_HANDLER *handlers, int *size);
 
 void key_press_loop(PRESS_HANDLER *handlers, int size);
 

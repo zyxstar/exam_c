@@ -9,7 +9,7 @@
 void clear_tty();
 void reset_tty();
 
-void draw_frame(int top, int left, char turn_cd, char left_cd, char right_cd, char down_cd, char pause_cd);
+void draw_frame(int top, int left, char *turn_cd, char *left_cd, char *right_cd, char *down_cd, char *pause_cd);
 void draw_level(int frame_top, int frame_left, int level);
 void draw_score(int frame_top, int frame_left, int score);
 void draw_next_block(int frame_top, int frame_left, BLOCK *block);

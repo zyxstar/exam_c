@@ -36,6 +36,9 @@ utils.o: $(IDIR)/utils.c
 clean:
 	rm $(OBJECTS) tetris_single.o tetris_single
 
+clean_single2:
+	rm $(OBJECTS) tetris_single2.o tetris_single2
+
 clean_double:
 	rm $(OBJECTS) tetris_double.o tetris_double
 

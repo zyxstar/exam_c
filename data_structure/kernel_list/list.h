@@ -1,7 +1,8 @@
 #ifndef HS_KERNEL_LIST_H
 #define HS_KERNEL_LIST_H
 
-///lib/modules/3.2.0-23-generic-pae/build/include/linux
+// `/usr/src/kernels/2.6.32-358.el6.x86_64/include/linux`
+
 
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 

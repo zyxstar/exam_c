@@ -211,5 +211,5 @@ int main(){
 
 
 
-// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c menu.c app.c -o app.out -DDEBUG && ./app.out
-// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c menu.c app.c -o app.out && ./app.out
+// gcc -I ../utils ../utils/utils.c ../utils/list.c ../utils/menu.c user.c train.c app.c -o app.out -DDEBUG && ./app.out
+

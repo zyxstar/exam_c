@@ -96,12 +96,12 @@ static BOOL _cmp_menu_fn(void *exist, void *data){
 }
 
 static BOOL _change_menu(MENU **cur_menu, int op){// must MENU**
-    // printf("menu[%d]", op);
+    DEBUG_WRITE(("_change_menu begin: [id]%d\n", op));
     if((*cur_menu)->sub_menus == NULL) return FALSE;
     int idx = list_find_idx((*cur_menu)->sub_menus, 0, &op, _cmp_menu_fn);
     if(idx == -1) return FALSE;
     *cur_menu = (MENU*)list_get_elem_by_idx((*cur_menu)->sub_menus, idx);
-    // printf("[%s]\n", (*cur_menu)->text);
+    DEBUG_WRITE(("_change_menu end: [text]%s\n", (*cur_menu)->text));
 }
 
 static void _back_menu(MENU *root, MENU **cur_menu){// must MENU**

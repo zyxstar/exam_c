@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "list.h"
 #include "user.h"
 
 static void _destroy_user(void *data){
@@ -11,13 +12,13 @@ static void _destroy_user(void *data){
     free(u->passwd);
 }
 
-void init_users(LIST *users){//caller will assign users memory
+void init_users(LIST *users){//caller will assign `users` memory
     list_new(users, sizeof(USER), _destroy_user);//need free
 }
 
 void destroy_users(LIST *users){
     list_free(users);
-    //caller will [auto] free users memory
+    //caller will [auto] free `users` memory
 }
 
 static BOOL _cmp_user_name(void *exist, void *data){

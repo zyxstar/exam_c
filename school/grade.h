@@ -4,6 +4,7 @@
 typedef struct {
     int year;
     struct list_head class_list;
+    struct list_head node;
 } GRAGE;
 
 

@@ -1,9 +1,10 @@
-#include "list.h"
+#include "kernel_list.h"
 #include "class.h"
 
 typedef struct {
     int year;
     struct list_head class_list;
+    struct list_head node;
 } GRAGE;
 
 

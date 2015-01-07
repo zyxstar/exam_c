@@ -2,14 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include "kernel_list.h"
-#include "class.h"
+#include "kernel_list_helper.h"
 #include "student.h"
+#include "class.h"
+#include "grade.h"
+
 
 
 CLASS *class_new(char *name){
     CLASS *cls = malloc(sizeof(*cls));
-    strncpy(cls->name, name, CLS_NAMESIZE);
     INIT_LIST_HEAD(&cls->student_list);
+    strncpy(cls->name, name, CLS_NAMESIZE);
+    cls->stu_count = 0;
+    cls->grade = NULL;
     return cls;
 }
 
@@ -24,35 +29,27 @@ void class_free(CLASS *cls){
 
 void class_add_student(CLASS *cls, STUDENT *stu){
     list_add_tail(&stu->node, &cls->student_list);
+    stu->cls = cls;
+    cls->stu_count++;
 }
 
 void class_del_student(CLASS *cls, STUDENT *stu){
     __list_del_entry(&stu->node);
     student_free(stu);
+    cls->stu_count--;
 }
 
-void class_each_student(CLASS *cls, void *env, EACH_DO_FN *each_do){
-    struct list_head *cur;
-    STUDENT *stu;
-    int i = 0;
-    __list_for_each(cur, &cls->student_list) {
-        stu = list_entry(cur, STUDENT, node);
-        each_do(stu, i++, env);
-    }
-}
+// declare
+void class_each_student(CLASS *, void *env, void(*each_do)(STUDENT *, int idx, void *env));
+// implement
+_implement_list_each(class_each_student, CLASS, student_list, STUDENT, node);
 
-typedef int _CMP_FN(const void *, const STUDENT *);
 
-static STUDENT *_class_find_student(CLASS *cls, const void *key, _CMP_FN *cmp){
-    struct list_head *cur;
-    STUDENT *stu;
-    __list_for_each(cur, &cls->student_list) {
-        stu = list_entry(cur, STUDENT, node);
-        if(cmp(key, stu) == 0)
-            return stu;
-    }
-    return NULL;
-}
+
+// declare
+STUDENT *_class_find_student(CLASS *, const void *key, int(*cmp)(const void *key, const STUDENT *));
+// implement
+_implement_list_find(_class_find_student, CLASS, student_list, STUDENT, node);
 
 static _id_cmp(const void *key, const STUDENT *stu){
     const int *id = key;
@@ -75,41 +72,47 @@ STUDENT *class_find_student_by_name(CLASS *cls, const char *name){
 
 
 
-static void _student_save(STUDENT *stu, int idx, void *env){
-    FILE *fp = ((void**)env)[0];
-    int *num = ((void**)env)[1];
-    student_save(stu, fp);
-    *num = idx;
+static void _append_to_arr(STUDENT *stu, int idx, void *env){
+    STUDENT **arr = env;
+    arr[idx] = stu;
 }
 
+STUDENT **class_sort_by_score(CLASS *cls){
+    STUDENT **arr = malloc(sizeof(STUDENT *) * cls->stu_count);
+    class_each_student(cls, arr, _append_to_arr);
+    return student_sort(arr, student_cmp_by_score, cls->stu_count);
+}
+
+
+
+
+
+// declare
+void _class_save(CLASS *, FILE *, void(*save_entry)(STUDENT *, FILE *));
+// implement
+_implement_list_save(_class_save, CLASS, student_list, STUDENT, node);
+
+
 void class_save(CLASS *cls, FILE *fp){
-    long offset_count, offset_stream;
-    fwrite(cls, sizeof(CLASS), 1, fp);
-    offset_count = ftell(fp);//save `count` position
-    int count;
-    fseek(fp, sizeof(int), SEEK_CUR);//retain `count` memory
+    cls->stu_count = 0; // need'nt write to file
+    _class_save(cls, fp, student_save);
+}
 
-    void *env[] = {fp, &count};
-    class_each_student(cls, env, _student_save);
-    count += 1;
-    offset_stream = ftell(fp);
 
-    fseek(fp, offset_count, SEEK_SET);//go back to write `count`
-    fwrite(&count, sizeof(count), 1, fp);
 
-    fseek(fp, offset_stream, SEEK_SET);//reset offset stream
+// declare
+CLASS *_class_load(FILE *, void(*load_entry)(CLASS *, FILE *));
+// implement
+_implement_list_load(_class_load, CLASS, student_list);
+
+static void _student_load_to_class(CLASS *cls, FILE *fp){
+    class_add_student(cls, student_load(fp));
 }
 
 CLASS *class_load(FILE *fp){
-    CLASS *cls = malloc(sizeof(CLASS));
-    fread(cls, sizeof(CLASS), 1, fp);
-    INIT_LIST_HEAD(&cls->student_list);
-    int i, count;
-    fread(&count, sizeof(int), 1, fp);
-    for(i = 0; i < count; i++)
-        class_add_student(cls, student_load(fp));
-    return cls;
+    return _class_load(fp, _student_load_to_class);
 }
+
 
 
 static void _student_display(STUDENT *stu, int idx, void *env){
@@ -118,8 +121,10 @@ static void _student_display(STUDENT *stu, int idx, void *env){
 }
 
 void class_display(CLASS *cls, int indent){
-    char format[] = "%0sCLASS: [name]%s\n";
-    format[1] = '0' + indent;
-    printf(format, "", cls->name);
+    char format[] = "%0sCLASS: [grade(year)]%04d\t[name]%s\t[stu_count]%d\n";
+    format[1] = '0' + (indent > 9 ? 9 : indent);
+    printf(format, "", (cls->grade == NULL) ? 0 : cls->grade->year, cls->name, cls->stu_count);
     class_each_student(cls, &indent, _student_display);
 }
+
+

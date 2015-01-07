@@ -4,9 +4,10 @@
 #include "array.h"
 #include "list.h"
 
-
-
+typedef void reduce_call1(int *, int *, int);
+void _reduce1(reduce_call1 *, int *arr, int size, int *stat);
 def_reduce(_reduce1, int, int);
+
 void add(int *acc, int *b, int idx){ *acc += *b;}
 void test_reduce1(){
     int arr[] = {1,3,4,56};
@@ -181,7 +182,7 @@ void test_filter1(){
 
 
 int main(){
-    // test_reduce1();
+    test_reduce1();
     // test_reduce2();
     // test_reduce3();
     // test_reduce4();
@@ -191,9 +192,9 @@ int main(){
     // test_range3();
     // test_map1();
     // test_map2();
-    test_filter1();
+    // test_filter1();
     return 0;
 }
 
 
-// gcc list.c array.c test_array.c -o test_array.out && ./test_array.out
+// gcc list.c test_array.c -o test_array.out && ./test_array.out

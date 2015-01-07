@@ -7,30 +7,40 @@
 
 #define CLS_NAMESIZE 32
 
+typedef struct GRADE_TAG GRADE;
+typedef struct CLASS_TAG CLASS;
 
-typedef struct {
+struct CLASS_TAG{
     char name[CLS_NAMESIZE];
     struct list_head student_list;
+    int stu_count;
     struct list_head node;
-} CLASS;
+    GRADE *grade;
+};
 
-typedef int CMP_FN(const STUDENT *, const STUDENT *);
-typedef void EACH_DO_FN(STUDENT *, int idx, void *env);
 
 
 
 CLASS *class_new(char *name);
-void class_free(CLASS *cls);
+void class_free(CLASS *);
 
-void class_add_student(CLASS *cls, STUDENT *stu);
-void class_del_student(CLASS *cls, STUDENT *stu);
-void class_each_student(CLASS *cls, void *env, EACH_DO_FN *);
-STUDENT *class_find_student_by_id(CLASS *cls, int id);
-STUDENT *class_find_student_by_name(CLASS *cls, const char *name);
-void class_sort(CLASS *cls, CMP_FN *);
+void class_add_student(CLASS *, STUDENT *);
+void class_del_student(CLASS *, STUDENT *);
+void class_each_student(CLASS *, void *env, void(*each_do)(STUDENT *, int idx, void *env));
 
-void class_save(CLASS *cls, FILE *fp);
-CLASS *class_load(FILE *fp);
+STUDENT *class_find_student_by_id(CLASS *, int id);
+STUDENT *class_find_student_by_name(CLASS *, const char *name);
 
-void class_display(CLASS *cls, int indent);
+
+//need free
+STUDENT **class_sort_by_score(CLASS *);
+
+
+void class_save(CLASS *, FILE *);
+CLASS *class_load(FILE *);
+
+void class_display(CLASS *, int indent);
+
+
+
 #endif

@@ -1,5 +1,5 @@
-#ifndef KERNEL_LIST_WRAP_H_INCLUEDE
-#define KERNEL_LIST_WRAP_H_INCLUEDE
+#ifndef KERNEL_LIST_HELPER_H_INCLUEDE
+#define KERNEL_LIST_HELPER_H_INCLUEDE
 
 #include <stdio.h>
 #include "kernel_list.h"
@@ -51,12 +51,13 @@
     }\
 
 #define _implement_list_load(fun_name, container_type, container_list_member)\
-    container_type *fun_name(FILE *fp, void(*entry_load)(container_type *, FILE *)){\
+    container_type *fun_name(FILE *fp, void(*config_container)(container_type *), void(*entry_load)(container_type *, FILE *)){\
         container_type *ptr = malloc(sizeof(container_type));\
         fread(ptr, sizeof(container_type), 1, fp);\
         INIT_LIST_HEAD(&ptr->container_list_member);\
         int i, count;\
         fread(&count, sizeof(int), 1, fp);\
+        config_container(ptr);\
         for(i = 0; i < count; i++)\
             entry_load(ptr, fp);\
         return ptr;\

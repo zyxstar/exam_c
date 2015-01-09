@@ -3,6 +3,8 @@
 #include "student.h"
 #include "class.h"
 #include "grade.h"
+#include "event.h"
+
 
 
 #define TEST_DRIVER(fun)\
@@ -130,7 +132,77 @@ void test_grade_load(){
 
 
 
+
+static void _e_handler1(void *sender, void *receiver, void *arg){
+    int *sender2 = sender;
+    int *receiver2 = receiver;
+    int *arg2 = arg;
+    printf("_e_handler1 %d %d %d\n", *sender2, *receiver2, *arg2);
+}
+
+static void _e_handler2(void *sender, void *receiver, void *arg){
+    int *sender2 = sender;
+    int *receiver2 = receiver;
+    int *arg2 = arg;
+    printf("_e_handler2 %d %d %d\n", *sender2, *receiver2, *arg2);
+}
+
+void test_event(){
+    int sender = 10;
+    EVENT *e = event_new(&sender);
+    int receiver = 100;
+    event_add(e, &receiver, _e_handler1);
+    event_add(e, &receiver, _e_handler2);
+
+    int arg = 20;
+    event_trigger(e, &arg);
+
+    event_remove(e, &receiver, _e_handler1);
+    arg = 30;
+    event_trigger(e, &arg);
+
+    event_free(e);
+}
+
+
+void test_class_event(){
+    GRADE *grade = prepare_grade(1998);
+    printf("%d\n", grade->stu_count);
+
+    CLASS *cls = grade_find_class_by_name(grade, "A02");
+    STUDENT *stu = student_new(2, "zyx2", 68);
+    class_add_student(cls, stu);
+    printf("%d\n", grade->stu_count);
+
+    class_del_student(cls, stu);
+    printf("%d\n", grade->stu_count);
+
+    grade_free(grade);
+}
+
+
+void test_class_event_after_load(){
+    FILE *fp = fopen("grade.data", "r");
+    GRADE *grade = grade_load(fp);
+    printf("%d\n", grade->stu_count);
+
+    CLASS *cls = grade_find_class_by_name(grade, "A02");
+    STUDENT *stu = student_new(2, "zyx2", 68);
+    class_add_student(cls, stu);
+    printf("%d\n", grade->stu_count);
+
+    class_del_student(cls, stu);
+    printf("%d\n", grade->stu_count);
+
+    grade_free(grade);
+}
+
+
+
+
 int main(){
+
+
     TEST_DRIVER(test_class_dislpay);
     TEST_DRIVER(test_class_find);
     TEST_DRIVER(test_class_del);
@@ -145,7 +217,9 @@ int main(){
     TEST_DRIVER(test_grade_save);
     TEST_DRIVER(test_grade_load);
 
-
+    TEST_DRIVER(test_event);
+    TEST_DRIVER(test_class_event);
+    TEST_DRIVER(test_class_event_after_load);
 
 
 
@@ -154,5 +228,5 @@ int main(){
 }
 
 
-// gcc student.c class.c grade.c test.c -o test.out && ./test.out
+// gcc event.c student.c class.c grade.c test.c -o test.out && ./test.out
 // gcc test.c -E -o test.i

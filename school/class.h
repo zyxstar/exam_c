@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "kernel_list.h"
 #include "student.h"
+#include "event.h"
+
 
 #define CLS_NAMESIZE 32
 
@@ -12,10 +14,15 @@ typedef struct CLASS_TAG CLASS;
 
 struct CLASS_TAG{
     char name[CLS_NAMESIZE];
-    struct list_head student_list;
+
     int stu_count;
-    struct list_head node;
+    struct list_head student_list;
+
+    EVENT *student_added;
+    EVENT *student_deled;
+
     GRADE *grade;
+    struct list_head node;
 };
 
 

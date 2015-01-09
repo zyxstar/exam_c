@@ -15,6 +15,8 @@ CLASS *class_new(char *name){
     strncpy(cls->name, name, CLS_NAMESIZE);
     cls->stu_count = 0;
     cls->grade = NULL;
+    cls->student_added = event_new(cls);
+    cls->student_deled = event_new(cls);
     return cls;
 }
 
@@ -24,6 +26,8 @@ static void _student_free(STUDENT *stu, int idx, void *env){
 
 void class_free(CLASS *cls){
     class_each_student(cls, NULL, _student_free);
+    event_free(cls->student_added);
+    event_free(cls->student_deled);
     free(cls);
 }
 
@@ -31,12 +35,14 @@ void class_add_student(CLASS *cls, STUDENT *stu){
     list_add_tail(&stu->node, &cls->student_list);
     stu->cls = cls;
     cls->stu_count++;
+    event_trigger(cls->student_added, NULL);
 }
 
 void class_del_student(CLASS *cls, STUDENT *stu){
     __list_del_entry(&stu->node);
     student_free(stu);
     cls->stu_count--;
+    event_trigger(cls->student_deled, NULL);
 }
 
 // declare
@@ -94,24 +100,31 @@ _implement_list_save(_class_save, CLASS, student_list, STUDENT, node);
 
 
 void class_save(CLASS *cls, FILE *fp){
-    cls->stu_count = 0; // need'nt write to file
     _class_save(cls, fp, student_save);
 }
 
 
 
 // declare
-CLASS *_class_load(FILE *, void(*load_entry)(CLASS *, FILE *));
+CLASS *_class_load(FILE *, void(*config_class)(CLASS *), void(*load_entry)(CLASS *, FILE *));
 // implement
 _implement_list_load(_class_load, CLASS, student_list);
+
+static void _config_class(CLASS *cls){
+    cls->stu_count = 0; //reset `count` after loaded
+    cls->student_added = event_new(cls);
+    cls->student_deled = event_new(cls);
+}
 
 static void _student_load_to_class(CLASS *cls, FILE *fp){
     class_add_student(cls, student_load(fp));
 }
 
 CLASS *class_load(FILE *fp){
-    return _class_load(fp, _student_load_to_class);
+    return _class_load(fp, _config_class, _student_load_to_class);
 }
+
+
 
 
 

@@ -26,11 +26,24 @@ void grade_free(GRADE *grade){
 }
 
 
+
+static void _listen_student_added(void *sender, void *receiver, void *arg){
+    GRADE *grade = receiver;
+    grade->stu_count++;
+}
+
+static void _listen_student_deled(void *sender, void *receiver, void *arg){
+    GRADE *grade = receiver;
+    grade->stu_count--;
+}
+
 void grade_add_class(GRADE *grade, CLASS *cls){
     list_add_tail(&cls->node, &grade->class_list);
     cls->grade = grade;
     grade->cls_count++;
     grade->stu_count += cls->stu_count;
+    event_add(cls->student_added, grade, _listen_student_added);
+    event_add(cls->student_deled, grade, _listen_student_deled);
 }
 
 void grade_del_class(GRADE *grade, CLASS *cls){
@@ -96,8 +109,6 @@ void _grade_save(GRADE *, FILE *, void(*save_entry)(CLASS *, FILE *));
 _implement_list_save(_grade_save, GRADE, class_list, CLASS, node);
 
 void grade_save(GRADE *grade, FILE *fp){
-    grade->cls_count = 0; // need'nt write to file
-    grade->stu_count = 0;
     _grade_save(grade, fp, class_save);
 }
 
@@ -105,18 +116,22 @@ void grade_save(GRADE *grade, FILE *fp){
 
 
 // declare
-GRADE *_grade_load(FILE *, void(*load_entry)(GRADE *, FILE *));
+GRADE *_grade_load(FILE *, void(*config_grade)(GRADE *), void(*load_entry)(GRADE *, FILE *));
 // implement
 _implement_list_load(_grade_load, GRADE, class_list);
+
+static void _config_grade(GRADE *grade){
+    grade->cls_count = 0; //reset `count` after loaded
+    grade->stu_count = 0;
+}
 
 static void _class_load_to_grade(GRADE *grade, FILE *fp){
     grade_add_class(grade, class_load(fp));
 }
 
 GRADE *grade_load(FILE *fp){
-    return _grade_load(fp, _class_load_to_grade);
+    return _grade_load(fp, _config_grade, _class_load_to_grade);
 }
-
 
 static void _class_display(CLASS *cls, int idx, void *env){
     int *indent = env;

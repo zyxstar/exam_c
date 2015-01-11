@@ -20,3 +20,11 @@ int main(int argc, const char* argv[]){
     (void)(charray == intarr);
     return 0;
 }
+
+
+找到二叉树节点前驱 某左 右指向，可以使用 ** ,而不需要重新定义一个变量
+
+
+parent 方案
+
+

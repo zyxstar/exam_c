@@ -287,5 +287,5 @@ int main(int argc, const char* argv[]){
     return 0;
 }
 
-// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out -DDEBUG -lm -lpthread && ./test_game.out
-// gcc -I ../utils ../utils/utils.c test_game.c game.c -o test_game.out -lm -lpthread && ./test_game.out > test.log
+// gcc -I../../utils -I../ ../../utils/utils.c test_game.c ../game.c -o test_game.out -DDEBUG -lm -lpthread && ./test_game.out
+// gcc -I../../utils -I../ ../../utils/utils.c test_game.c ../game.c -o test_game.out -DDEBUG -lm -lpthread && ./test_game.out > test.log

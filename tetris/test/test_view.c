@@ -46,4 +46,4 @@ int main(){
 }
 
 
-// gcc -I ../utils ../utils/utils.c game.c view.c test_view.c -o test_view.out -lm -lpthread && ./test_view.out
+// gcc -I../../utils -I../ ../../utils/utils.c ../game.c ../view.c test_view.c -o test_view.out -lm -lpthread && ./test_view.out

@@ -23,4 +23,4 @@ int main(){
     return 0;
 }
 
-// gcc -I ../utils color.c -o color.out && ./color.out
+// gcc -I ../ test_vt_color.c -o test_vt_color.out && ./test_vt_color.out

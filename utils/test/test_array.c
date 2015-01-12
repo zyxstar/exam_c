@@ -197,4 +197,4 @@ int main(){
 }
 
 
-// gcc list.c test_array.c -o test_array.out && ./test_array.out
+// gcc -I ../ ../list.c test_array.c -o test_array.out && ./test_array.out

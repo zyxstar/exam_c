@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)http://www.apuebook.com/errata2e.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css">
+<!--
+.style1 {font-family: "Courier New", Courier, mono}
+-->
+</style>
+<title>Errata</title>
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head><body><center><h1>Advanced Programming in the UNIX® Environment, Second Edition</h1><hr></center>
+
+
+
+<table width="90%" border="0" cellpadding="2" cellspacing="0">
+  <tbody><tr>
+    <td align="left" valign="top" width="180">
+      <div>
+	<p><a href="http://www.apuebook.com/cover2e.html"><img src="./Errata_files/cover2.jpg" alt="" name="cover" width="103" height="137" border="1"></a></p>
+        <p><a href="http://www.apuebook.com/about2e.html" title="About the Book">About the Book</a></p>
+        <p><a href="http://www.apuebook.com/code2e.html" title="Source Code">Source Code</a></p>
+        <p><a href="http://www.apuebook.com/lostchapter.html" title="The Lost Chapter">The Lost Chapter</a></p>
+        <p><a href="./Errata_files/Errata.htm" title="Errata">Errata</a></p>
+        <p><a href="http://www.apuebook.com/thanks2e.html" title="Additional Acknowledgements">Additional Acknowledgements</a></p>
+        <p><a href="http://www.apuebook.com/faqs2e.html" title="Frequently Asked Questions">FAQs</a></p>
+        <p><a href="mailto:sar@apuebook.com">Contact the Author</a></p>
+        <p><a href="http://www.kohala.com/start/">Rich Stevens home page</a></p>
+	<p><a href="http://click.linksynergy.com/link?id=Yly3AMLG/Bk&offerid=145238.168432&type=2&murl=http%3A%2F%2Fwww.informit.com%2Fstore%2Fproduct.aspx%3Fisbn%3D0201433079">Buy the book from Addison-Wesley Professional</a><img border="0" width="1" height="1" src="./Errata_files/show"></p>
+      </div>
+    </td>
+    <td align="left" valign="top" border="0" cellpadding="0" cellspacing="0">
+      <div>
+        <p>Welcome to the web site dedicated to the support of the second edition of <em>Advanced Programming in the UNIX® Environment</em>.</p>
+        <p>The following  errors were fixed in the second printing.</p>
+        <ol>
+          <li>Page 413, third paragraph. If a signal is related to an expiring timer, it is sent to an arbitrary thread, not necessarily to the thread that scheduled the timer. Hardware-related signals are usually delivered to the thread generating the fault (FreeBSD 5.2.1 seems to depart from this is some cases, however). Look <a href="http://www.apuebook.com/threadsig.html">here</a> for some test programs that illustrate the behavior of signals with multithreaded processes.</li>
+          <li>Page 67, sentence before Section 3.7. The size is 2GB, not 2TB.</li>
+          <li>Page 523, Figure 15.26. The largest message we can send on FreeBSD 5.2.1 is 2048 bytes. The kernel limits this value to the maximum size in bytes allowed on a queue.</li>
+          <li>Page 367, Figure 11.6. <span class="style1">pthread_cancel_push</span> should be <span class="style1">pthread_cleanup_push</span>.</li>
+          <li>Page 382, last sentence on page. <span class="style1">pthread_mutex_destroy</span> should be <span class="style1">pthread_cond_destroy</span>.</li>
+          <li>Page 357, function prototype for <span class="style1">pthread_create</span>. The argument for the start routine is a <span class="style1">void *</span>, not a <span class="style1">void</span>.</li>
+          <li>Page 158, near bottom of page. <span class="style1">tempfile</span> should be <span class="style1">tmpfile</span>.</li>
+          <li>Page 853, solution to exercise 1.3. <span class="style1">ptr</span> should be <span class="style1">msg</span> to make it consistent with the function prototype for <span class="style1">perror</span> shown earlier in the book.</li>
+        </ol>
+        <p>The following  errors were fixed in the third printing.</p>
+        <ol start="9">
+          <li>Page 194, function prototypes for <span class="style1">setenv</span> and <span class="style1">unsetenv</span>. These functions return -1 on error, which is more specific than simply a nonzero return value.</li>
+          <li>Page 306, Figure 10.4. The Corrigenda for the Single UNIX Specification added <span class="style1">abort</span> and <span class="style1">sockatmark</span> to the list of reentrant functions.</li>
+          <li>Page 361, middle of page. The discussion of <span class="style1">pthread_join</span> has been cleaned up, making it clear which thread is placed in the detached state and that it is implementation-specific whether this function fails.</li>
+          <li>Page 365, Example at end of page. "nonzero" should be "zero."</li>
+          <li>Page 367, middle of page. The behavior of implementations varies concerning whether cleanup handlers are called if a thread returns from its start routine.</li>
+          <li>Page 367, end of page. <span class="style1">pthread_join</span> for a detached thread might not fail in some implementations, so change "will" to "can."</li>
+          <li>Page 374, middle of page. <span class="style1">fh[idx]</span> <span class="style1">=</span> <span class="style1">fp-&gt;f_next</span> should be <span class="style1">fh[idx]</span> <span class="style1">=</span> <span class="style1">fp</span>. Actually, I should apologize for this one. I've written this logic (correctly) so many times that I have no good excuse for getting it wrong this time. Same problem occurs again near the top of page 377.</li>
+          <li>Page 374, end of page. In the statement <span class="style1">idx</span> <span class="style1">=</span> <span class="style1">HASH(fp)</span> at the beginning of <span class="style1">foo_find</span>, <span class="style1">fp</span> is undefined at this point. The correct thing to do is to search every hash chain to find a matching ID. Same problem occurs again in the middle of page 377.</li>
+          <li>Page 391, function prototype for <span class="style1">pthread_attr_setstack</span>. Remove the <span class="style1">const</span> type qualifier.</li>
+          <li>Pages 414-415, Figure 12.16. Change the variable <span class="style1">wait</span> to <span class="style1">waitloc</span> to allow compilation on some platforms.</li>
+          <li>Page 599, Figure 17.16. The variable <span class="style1">len</span> should be declared to be of type <span class="style1">socklen_t</span>.</li>
+          <li>Pages 849 and 851 (Figures B.3 and B.4). The <span class="style1">snprintf</span> and <span class="style1">vsnprintf</span> calls should specify one byte less than the size of the buffer to prevent overwriting the byte after the end of the buffer with a newline.</li>
+        </ol>
+        <p>Here are the errors fixed in the fifth printing:</p>
+        <ol start="21">
+          <li>Page 255, top of page. <span class="style1">ac_flag</span> should be <span class="style1">ac_stat</span>.</li>
+          <li>Page 14, first paragraph. The statement that all threads in a process share the same stacks is a little misleading: each thread executes on its own stack, although any thread can access the stack of the other threads in the process, because the address space is shared among the threads. </li>
+          <li>Page 701, last paragraph. Figure 15.8 should be Figure 15.19. </li>
+        </ol>
+      </div>
+  </td></tr>
+</tbody></table>
+
+
+</body></html>

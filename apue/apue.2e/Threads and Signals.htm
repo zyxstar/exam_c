@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<!-- saved from url=(0038)http://www.apuebook.com/threadsig.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Threads and Signals</title>
+<style type="text/css">
+<!--
+.style1 {font-family: "Courier New", Courier, mono}
+-->
+</style>
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head><body><center><h1>Advanced Programming in the UNIX® Environment, Second Edition</h1><hr></center>
+
+
+
+<table width="90%" border="0" cellpadding="2" cellspacing="0">
+  <tbody><tr>
+    <td align="left" valign="top" width="180">
+      <div>
+	<p><a href="http://www.apuebook.com/cover2e.html"><img src="./Threads and Signals_files/cover2.jpg" alt="" name="cover" width="103" height="137" border="1"></a></p>
+        <p><a href="http://www.apuebook.com/about2e.html" title="About the Book">About the Book</a></p>
+        <p><a href="http://www.apuebook.com/code2e.html" title="Source Code">Source Code</a></p>
+        <p><a href="http://www.apuebook.com/lostchapter.html" title="The Lost Chapter">The Lost Chapter</a></p>
+        <p><a href="http://www.apuebook.com/errata2e.html" title="Errata">Errata</a></p>
+        <p><a href="http://www.apuebook.com/thanks2e.html" title="Additional Acknowledgements">Additional Acknowledgements</a></p>
+        <p><a href="http://www.apuebook.com/faqs2e.html" title="Frequently Asked Questions">FAQs</a></p>
+        <p><a href="mailto:sar@apuebook.com">Contact the Author</a></p>
+        <p><a href="http://www.kohala.com/start/">Rich Stevens home page</a></p>
+	<p><a href="http://click.linksynergy.com/link?id=Yly3AMLG/Bk&offerid=145238.168432&type=2&murl=http%3A%2F%2Fwww.informit.com%2Fstore%2Fproduct.aspx%3Fisbn%3D0201433079">Buy the book from Addison-Wesley Professional</a><img border="0" width="1" height="1" src="./Threads and Signals_files/show"></p>
+      </div>
+    </td>
+    <td align="left" valign="top" border="0" cellpadding="0" cellspacing="0">
+      <div>
+        <p>The first program will create 8 threads and set an alarm. You can control which threads block <span class="style1">SIGALRM</span> and which thread makes the call to <span class="style1">alarm</span>(2). Specifying a thread number (or "main" for the main thread) will cause that thread to block <span class="style1">SIGALRM</span>. Specifying "a[1-8]" will cause the specified thread to call <span class="style1">alarm</span>. By default, the main thread calls <span class="style1">alarm</span>. You can use this program to see which thread is delivered <span class="style1">SIGALRM</span>. Because Linux 2.4.x platforms use threads based on <span class="style1">clone</span>(2), results will differ from the other platforms. Linux 2.6.x platforms will behave more like the others (FreeBSD, Mac OS X, and Solaris).</p>
+        <hr>
+        <blockquote><pre class="style1">#include "apue.h"
+#include &lt;pthread.h&gt;
+#include &lt;signal.h&gt;
+
+#define NTHR 8
+
+sigset_t mask;
+pthread_t tid[NTHR];
+int block[NTHR];
+int alarmthread;
+
+void
+delay(int nsec)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct timespec ts;
+
+&nbsp;&nbsp;&nbsp;&nbsp;ts.tv_sec = nsec;
+&nbsp;&nbsp;&nbsp;&nbsp;ts.tv_nsec = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;nanosleep(&amp;ts, NULL);
+}
+
+void
+handler(int signo)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int i;
+&nbsp;&nbsp;&nbsp;&nbsp;pthread_t id;
+
+&nbsp;&nbsp;&nbsp;&nbsp;id = pthread_self();
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 0; i &lt; NTHR; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (tid[i] == id)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;if (i &gt;= NTHR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: caught signal %d\n", signo);
+&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: caught signal %d\n", i+1, signo);
+}
+
+void *
+thr_fn(void *arg)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int id;
+
+&nbsp;&nbsp;&nbsp;&nbsp;id = (int)arg;
+&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d started...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;if (block[id-1] != 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d blocking SIGALRM...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pthread_sigmask(SIG_BLOCK, &amp;mask, NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("thread %d: can't block SIGALRM", id);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (alarmthread == id) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: setting alarm...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alarm(5);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;pause();
+&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: exiting\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;exit(id);
+}
+
+int
+main(int argc, char *argv[])
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct sigaction act;
+&nbsp;&nbsp;&nbsp;&nbsp;int i, err, id;
+&nbsp;&nbsp;&nbsp;&nbsp;int doblock = 0;
+
+&nbsp;&nbsp;&nbsp;&nbsp;setbuf(stdout, NULL);
+&nbsp;&nbsp;&nbsp;&nbsp;sigemptyset(&amp;mask);
+&nbsp;&nbsp;&nbsp;&nbsp;sigaddset(&amp;mask, SIGALRM);
+&nbsp;&nbsp;&nbsp;&nbsp;act.sa_handler = handler;
+&nbsp;&nbsp;&nbsp;&nbsp;act.sa_flags = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;sigemptyset(&amp;act.sa_mask);
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 1; i &lt; argc; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(argv[i], "main") == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doblock = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (argv[i][0] == 'a') {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alarmthread = atoi(&amp;argv[i][1]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (alarmthread &gt; NTHR || alarmthread &lt; 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_quit("thread ID must be between 1 and %d\n", NTHR);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id = atoi(argv[i]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (id &gt; NTHR || id &lt; 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_quit("thread ID must be between 1 and %d\n", NTHR);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;block[id-1] = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (sigaction(SIGALRM, &amp;act, NULL) &lt; 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't install signal handler");
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 0; i &lt; NTHR; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = pthread_create(&amp;tid[i], NULL, thr_fn, (void *)(i+1));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_exit(err, "can't create thread");
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (doblock != 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread blocking SIGALRM...\n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pthread_sigmask(SIG_BLOCK, &amp;mask, NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("main thread: can't block SIGALRM");
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (alarmthread == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: setting alarm...\n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alarm(5);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;delay(10);
+&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: return from delay\n");
+&nbsp;&nbsp;&nbsp;&nbsp;exit(0);
+}
+        </pre></blockquote>
+        <hr>
+        <p>The second program is like the first, but generates a hardware fault instead. You can use it to verify that the thread that causes the fault is the same thread that is delivered <span class="style1">SIGSEGV</span>.</p>
+        <hr>
+        <pre class="style1">#include "apue.h"
+#include &lt;pthread.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;sys/mman.h&gt;
+
+#if !defined(MAP_FAILED)
+#define MAP_FAILED ((void *)-1)
+#endif
+
+#define NTHR 8
+#define MAPSZ (8*1024*1024)
+
+sigset_t mask;
+pthread_t tid[NTHR];
+int block[NTHR];
+int faultthread;
+char *mapaddr;
+
+void
+delay(int nsec)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct timespec ts;
+
+&nbsp;&nbsp;&nbsp;&nbsp;ts.tv_sec = nsec;
+&nbsp;&nbsp;&nbsp;&nbsp;ts.tv_nsec = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;nanosleep(&amp;ts, NULL);
+}
+
+void
+handler(int signo)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int i;
+&nbsp;&nbsp;&nbsp;&nbsp;pthread_t id;
+
+&nbsp;&nbsp;&nbsp;&nbsp;id = pthread_self();
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 0; i &lt; NTHR; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (tid[i] == id)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;if (i &gt;= NTHR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: caught signal %d\n", signo);
+&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: caught signal %d\n", i+1, signo);
+&nbsp;&nbsp;&nbsp;&nbsp;exit(1);
+}
+
+void
+oops(void)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;char c;
+
+&nbsp;&nbsp;&nbsp;&nbsp;c = *mapaddr;
+}
+
+void *
+thr_fn(void *arg)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int id;
+
+&nbsp;&nbsp;&nbsp;&nbsp;id = (int)arg;
+&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d started...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;if (block[id-1] != 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d blocking SIGSEGV...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pthread_sigmask(SIG_BLOCK, &amp;mask, NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("thread %d: can't block SIGSEGV", id);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (faultthread == id) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delay(2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: generating fault...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;oops();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;pause();
+&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: exiting\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;exit(id);
+}
+
+int
+main(int argc, char *argv[])
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct sigaction act;
+&nbsp;&nbsp;&nbsp;&nbsp;int i, err, id, fd;
+&nbsp;&nbsp;&nbsp;&nbsp;int doblock = 0;
+
+&nbsp;&nbsp;&nbsp;&nbsp;if ((fd = open("tempfile", O_RDWR|O_CREAT)) &lt; 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't open %s", argv[0]);
+&nbsp;&nbsp;&nbsp;&nbsp;if (lseek(fd, MAPSZ-1, SEEK_SET) == -1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't seek");
+&nbsp;&nbsp;&nbsp;&nbsp;if (write(fd, "a", 1) != 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't write to temp file");
+&nbsp;&nbsp;&nbsp;&nbsp;mapaddr = mmap(0, MAPSZ, PROT_READ, MAP_SHARED, fd, 0);
+&nbsp;&nbsp;&nbsp;&nbsp;if (mapaddr == MAP_FAILED)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't map temp file");
+&nbsp;&nbsp;&nbsp;&nbsp;unlink("tempfile");
+&nbsp;&nbsp;&nbsp;&nbsp;close(fd);
+&nbsp;&nbsp;&nbsp;&nbsp;if (munmap(mapaddr, MAPSZ) &lt; 0)&nbsp;&nbsp;&nbsp;&nbsp;/* invalidate the mapping */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't unmap file");
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 1; i &lt; argc; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(argv[i], "main") == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doblock = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (argv[i][0] == 'a') {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;faultthread = atoi(&amp;argv[i][1]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (faultthread &gt; NTHR || faultthread &lt; 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_quit("thread ID must be between 1 and %d\n", NTHR);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id = atoi(argv[i]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (id &gt; NTHR || id &lt; 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_quit("thread ID must be between 1 and %d\n", NTHR);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;block[id-1] = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;sigemptyset(&amp;mask);
+&nbsp;&nbsp;&nbsp;&nbsp;sigaddset(&amp;mask, SIGSEGV);
+&nbsp;&nbsp;&nbsp;&nbsp;act.sa_handler = handler;
+&nbsp;&nbsp;&nbsp;&nbsp;act.sa_flags = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;sigemptyset(&amp;act.sa_mask);
+&nbsp;&nbsp;&nbsp;&nbsp;if (sigaction(SIGSEGV, &amp;act, NULL) &lt; 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't install signal handler");
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 0; i &lt; NTHR; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = pthread_create(&amp;tid[i], NULL, thr_fn, (void *)(i+1));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_exit(err, "can't create thread");
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;delay(2);
+&nbsp;&nbsp;&nbsp;&nbsp;if (doblock != 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread blocking SIGSEGV...\n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pthread_sigmask(SIG_BLOCK, &amp;mask, NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("main thread: can't block SIGSEGV");
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (faultthread == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: generating fault...\n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;oops();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;delay(4);
+&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: return from delay\n");
+&nbsp;&nbsp;&nbsp;&nbsp;exit(0);
+}
+        </pre>
+        <hr>
+        <p>The third program is like the first, but uses <span class="style1">setitimer</span>(2) instead of <span class="style1">alarm</span>(2). You can use this to see how the signals are distributed among the threads over time. This test program was inspired by another test written by Michael Kerrisk.</p>
+        <hr>
+        <pre class="style1">#include "apue.h"
+#include &lt;pthread.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;sys/time.h&gt;
+
+#define NTHR 8
+
+sigset_t mask;
+pthread_t tid[NTHR];
+int block[NTHR];
+int alarmthread;
+
+void
+set_timer(void)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct itimerval tv;
+
+&nbsp;&nbsp;&nbsp;&nbsp;tv.it_value.tv_sec = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;tv.it_value.tv_usec = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;tv.it_interval.tv_sec = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;tv.it_interval.tv_usec = 1000;
+&nbsp;&nbsp;&nbsp;&nbsp;if (setitimer(ITIMER_REAL, &amp;tv, NULL) &lt; 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't set timer");
+}
+
+void
+delay(int nsec)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct timespec ts;
+
+&nbsp;&nbsp;&nbsp;&nbsp;ts.tv_sec = nsec;
+&nbsp;&nbsp;&nbsp;&nbsp;ts.tv_nsec = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;nanosleep(&amp;ts, NULL);
+}
+
+void
+handler(int signo)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int i;
+&nbsp;&nbsp;&nbsp;&nbsp;pthread_t id;
+
+&nbsp;&nbsp;&nbsp;&nbsp;id = pthread_self();
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 0; i &lt; NTHR; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (tid[i] == id)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;if (i &gt;= NTHR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: caught signal %d\n", signo);
+&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: caught signal %d\n", i+1, signo);
+}
+
+void *
+thr_fn(void *arg)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;int id;
+
+&nbsp;&nbsp;&nbsp;&nbsp;id = (int)arg;
+&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d started...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;if (block[id-1] != 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d blocking SIGALRM...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pthread_sigmask(SIG_BLOCK, &amp;mask, NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("thread %d: can't block SIGALRM", id);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (alarmthread == id) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("thread %d: setting alarm...\n", id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set_timer();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;for (;;)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pause();
+}
+
+int
+main(int argc, char *argv[])
+{
+&nbsp;&nbsp;&nbsp;&nbsp;struct sigaction act;
+&nbsp;&nbsp;&nbsp;&nbsp;int i, err, id;
+&nbsp;&nbsp;&nbsp;&nbsp;int doblock = 0;
+
+&nbsp;&nbsp;&nbsp;&nbsp;setbuf(stdout, NULL);
+&nbsp;&nbsp;&nbsp;&nbsp;sigemptyset(&amp;mask);
+&nbsp;&nbsp;&nbsp;&nbsp;sigaddset(&amp;mask, SIGALRM);
+&nbsp;&nbsp;&nbsp;&nbsp;act.sa_handler = handler;
+&nbsp;&nbsp;&nbsp;&nbsp;act.sa_flags = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;sigemptyset(&amp;act.sa_mask);
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 1; i &lt; argc; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(argv[i], "main") == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doblock = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (argv[i][0] == 'a') {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alarmthread = atoi(&amp;argv[i][1]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (alarmthread &gt; NTHR || alarmthread &lt; 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_quit("thread ID must be between 1 and %d\n", NTHR);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id = atoi(argv[i]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (id &gt; NTHR || id &lt; 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_quit("thread ID must be between 1 and %d\n", NTHR);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;block[id-1] = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (sigaction(SIGALRM, &amp;act, NULL) &lt; 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("can't install signal handler");
+&nbsp;&nbsp;&nbsp;&nbsp;for (i = 0; i &lt; NTHR; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = pthread_create(&amp;tid[i], NULL, thr_fn, (void *)(i+1));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_exit(err, "can't create thread");
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (doblock != 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread blocking SIGALRM...\n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (pthread_sigmask(SIG_BLOCK, &amp;mask, NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err_sys("main thread: can't block SIGALRM");
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;if (alarmthread == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("main thread: setting alarm...\n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set_timer();
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;for (;;)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pause();
+&nbsp;&nbsp;&nbsp;&nbsp;exit(0);
+}</pre>
+        <hr>
+        <p>&nbsp;</p>
+      </div>
+  </td></tr>
+</tbody></table>
+
+
+</body></html>

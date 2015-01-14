@@ -139,9 +139,7 @@ static void _class_display(CLASS *cls, int idx, void *env){
 }
 
 void grade_display(GRADE *grade, int indent){
-    char format[] = "%0sGRADE: [year]%d\t[cls_count]%d\t[stu_count]%d\n";
-    format[1] = '0' + (indent > 9 ? 9 : indent);
-    printf(format, "", grade->year, grade->cls_count, grade->stu_count);
+    printf("%*sGRADE: [year]%d\t[cls_count]%d\t[stu_count]%d\n", indent, "", grade->year, grade->cls_count, grade->stu_count);
     grade_each_class(grade, &indent, _class_display);
 }
 

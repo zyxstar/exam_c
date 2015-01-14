@@ -43,6 +43,7 @@
 
 #ifdef DEBUG
 #define DEBUG_WRITE(arg) debug_write arg
+// #define DEBUG_WRITE(format, arg...) debug_write(format, arg)
 #else
 #define DEBUG_WRITE(arg)
 #endif

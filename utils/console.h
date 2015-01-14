@@ -38,9 +38,6 @@
 
 
 
-
-
-
 #ifdef DEBUG
 #define DEBUG_WRITE(arg) debug_write arg
 // #define DEBUG_WRITE(format, arg...) debug_write(format, arg)
@@ -50,11 +47,11 @@
 
 void debug_write(char *format, ...);
 
-#define SNAP_INT(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %d\n"VT_RESET, arg)
-#define SNAP_CHAR(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %c\n"VT_RESET, arg)
-#define SNAP_FLOAT(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %f\n"VT_RESET, arg)
-#define SNAP_STRING(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %s\n"VT_RESET, arg)
-#define SNAP_POINTER(arg) fprintf(stderr, VT_RESET "\033[35m[" #arg "] %p\n"VT_RESET, arg)
+#define SNAP_INT(arg) fprintf(stderr, VT_RESET VT_PURPLE "[" #arg "] %d\n"VT_RESET, arg)
+#define SNAP_CHAR(arg) fprintf(stderr, VT_RESET VT_PURPLE "[" #arg "] %c\n"VT_RESET, arg)
+#define SNAP_FLOAT(arg) fprintf(stderr, VT_RESET VT_PURPLE "[" #arg "] %f\n"VT_RESET, arg)
+#define SNAP_STRING(arg) fprintf(stderr, VT_RESET VT_PURPLE "[" #arg "] %s\n"VT_RESET, arg)
+#define SNAP_POINTER(arg) fprintf(stderr, VT_RESET VT_PURPLE "[" #arg "] %p\n"VT_RESET, arg)
 
 
 void printf_correct(char *format, ...);
@@ -79,32 +76,6 @@ void set_keypress();
 void reset_keypress();
 
 
-
-typedef struct{
-    int interval; //millisecond
-    int const_interval;
-    int count;
-    char callee_name[256];
-    void(*callee_fn)(void *env);
-    void *env;
-} SIMPER_TIMER;
-
-
-
-
-
-void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env);
-
-void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name);
-
-void timer_start(SIMPER_TIMER *timer);
-void timer_stop(SIMPER_TIMER *timer);
-void timer_destroy(SIMPER_TIMER *timer);
-void timer_set_interval(SIMPER_TIMER *timer, int interval);
-
-#define timer_new(arg1, arg2, arg3, arg4) \
-        _timer_set_callee_name(arg1, __FILE__, __LINE__, #arg3);\
-        _timer_new((arg1), (arg2), (arg3), (arg4))
 
 
 #endif /*CONSOLE_H_INCLUEDE*/

@@ -13,8 +13,6 @@ typedef struct{
 
 
 
-
-
 void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), void *env);
 
 void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name);

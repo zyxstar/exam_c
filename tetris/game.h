@@ -1,8 +1,10 @@
 #ifndef GAME_H_INCLUEDE
 #define GAME_H_INCLUEDE
 
-#include <pthread.h>
-#include "utils.h"
+// #include <pthread.h>
+#include "console.h"
+#include "simple_timer.h"
+
 
 #define ROWS (20)
 #define COLS (10)
@@ -69,7 +71,7 @@ struct GAME_TAG{
     SIMPER_TIMER timer;
     GAME_UI *ui;
 
-    pthread_mutex_t mutex;
+    // pthread_mutex_t mutex; //when using singal, don't use the thread
 };
 
 

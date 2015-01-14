@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "utils.h"
+#include "console.h"
 #include "list.h"
 #include "user.h"
 #include "train.h"
@@ -104,5 +104,5 @@ int main(){
     return 0;
 }
 
-// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c test.c -o test.out -DDEBUG && ./test.out
-// gcc -I ../utils ../utils/utils.c ../utils/list.c user.c train.c test.c -o test.out && ./test.out
+// gcc -I../utils ../utils/console.c ../utils/list.c user.c train.c test.c -o test.out -DDEBUG && ./test.out
+// gcc -I../utils ../utils/console.c ../utils/list.c user.c train.c test.c -o test.out && ./test.out

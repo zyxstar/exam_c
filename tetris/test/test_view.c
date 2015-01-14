@@ -14,7 +14,7 @@ void test_view(){
     panel[15][6]=FILLED;
     panel[19][9]=FILLED;
 
-    draw_frame(FRM_TOP, 5, 'w','a','d','s','p');
+    draw_frame(FRM_TOP, 5, "w","a","d","s","p");
     draw_level(FRM_TOP, 5, 2);
     draw_score(FRM_TOP, 5, 1200);
     BLOCK b = _init_block('T', 0);
@@ -24,7 +24,7 @@ void test_view(){
     draw_pause(FRM_TOP, 5);
 
 
-    draw_frame(FRM_TOP, 45, 'i','j','l','k','p');
+    draw_frame(FRM_TOP, 45, "i","j","l","k","p");
     draw_level(FRM_TOP, 45, 3);
     draw_score(FRM_TOP, 45, 800);
     BLOCK b2 = _init_block('O', 1);
@@ -46,4 +46,4 @@ int main(){
 }
 
 
-// gcc -I../../utils -I../ ../../utils/utils.c ../game.c ../view.c test_view.c -o test_view.out -lm -lpthread && ./test_view.out
+// gcc -I../../utils -I../ ../../utils/console.c ../../utils/simple_timer.c ../game.c ../view.c test_view.c -o test_view.out -lm && ./test_view.out

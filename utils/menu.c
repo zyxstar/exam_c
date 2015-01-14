@@ -48,7 +48,7 @@ void destroy_menu(MENU* root){
 
 
 
-void insert_menu(MENU *root, int id, int par_id, int op, char *text,
+void insert_menu(MENU *root, int id, int par_id, char *text,
                  void(*call_fn)(MENU *cur, void *env)){
     DEBUG_WRITE(("insert_menu begin: [id]%d, [pid]%d\n", id, par_id));
     MENU *target = _get_menu_by_id(root, par_id);
@@ -57,7 +57,7 @@ void insert_menu(MENU *root, int id, int par_id, int op, char *text,
         target->sub_menus = malloc(sizeof(LIST));
         list_new(target->sub_menus, sizeof(MENU), _destroy_menu);
     }
-    MENU m = {id, par_id, op, strdup(text), call_fn};
+    MENU m = {id, par_id, strdup(text), call_fn};
     list_add_elem(target->sub_menus, &m);
     DEBUG_WRITE(("insert_menu end: [id]%d, [pid]%d\n", id, par_id));
 }
@@ -69,15 +69,18 @@ void insert_menu(MENU *root, int id, int par_id, int op, char *text,
 
 static void _show_menu_item_fn(void* data, int idx, void* extra){
     MENU *m = (MENU*)data;
-    printf_info("   "VT_LIGHT VT_BLACK"[%2d]"VT_RESET VT_YELLOW" %s\n", m->op, m->text);
+    printf_info("   "VT_LIGHT VT_BLACK"[%2d]"VT_RESET VT_YELLOW" %s\n", m->id, m->text);
 }
 
 static void _show_sub_menu(MENU *m){
+    DEBUG_WRITE(("_show_sub_menu begin: [text]%s\n", m->text));
     if(m->sub_menus == NULL){
         printf_info("   module still in development\n");
+        DEBUG_WRITE(("_show_sub_menu end: [text]%s\n", m->text));
         return;
     }
     list_each_elem_do(m->sub_menus, NULL, _show_menu_item_fn);
+    DEBUG_WRITE(("_show_sub_menu end: [text]%s\n", m->text));
 }
 
 static void _show_cur_menu(MENU *cur_menu){
@@ -92,16 +95,17 @@ static void _show_cur_menu(MENU *cur_menu){
 
 
 static BOOL _cmp_menu_fn(void *exist, void *data){
-    return ((MENU*)exist)->op == *((int*)data);
+    return ((MENU*)exist)->id == *((int*)data);
 }
 
-static BOOL _change_menu(MENU **cur_menu, int op){// must MENU**
-    DEBUG_WRITE(("_change_menu begin: [id]%d\n", op));
+static BOOL _change_menu(MENU **cur_menu, int id){// must MENU**
+    DEBUG_WRITE(("_change_menu begin: [id]%d\n", id));
     if((*cur_menu)->sub_menus == NULL) return FALSE;
-    int idx = list_find_idx((*cur_menu)->sub_menus, 0, &op, _cmp_menu_fn);
+    int idx = list_find_idx((*cur_menu)->sub_menus, 0, &id, _cmp_menu_fn);
     if(idx == -1) return FALSE;
     *cur_menu = (MENU*)list_get_elem_by_idx((*cur_menu)->sub_menus, idx);
     DEBUG_WRITE(("_change_menu end: [text]%s\n", (*cur_menu)->text));
+    return TRUE;
 }
 
 static void _back_menu(MENU *root, MENU **cur_menu){// must MENU**
@@ -112,25 +116,26 @@ static void _back_menu(MENU *root, MENU **cur_menu){// must MENU**
 
 void show_menu(MENU *root, void *env){
     MENU *cur_menu = root;
-    int op;
+    int id;
     while(1){
         _show_cur_menu(cur_menu);
 
-        if(scanf("%d", &op) != 1){
+        if(scanf("%d", &id) != 1){
             printf_error("-> error code, choice again:\n");
             getchar();
             continue;
         }
 
-        if(op == -1) break;
-        if(op == 0) {
+        if(id == -1) break;
+        if(id == 0) {
             _back_menu(root, &cur_menu);
             continue;
         }
 
-        if(_change_menu(&cur_menu, op)){
-            if(cur_menu->call_fn == NULL)
+        if(_change_menu(&cur_menu, id)){
+            if(cur_menu->call_fn == NULL){
                 continue;
+            }
             else{
                 printf(VT_LIGHT VT_BLACK"-> [%s]\n"VT_RESET, cur_menu->text);
                 cur_menu->call_fn(cur_menu, env);
@@ -138,7 +143,7 @@ void show_menu(MENU *root, void *env){
             }
         }
         else
-            printf_error("-> error code, choice again:\n");
+            printf_error("-> change failed, choice again:\n");
 
     }
 }

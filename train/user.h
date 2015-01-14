@@ -1,6 +1,6 @@
-#include "utils.h"
-#include "list.h"
 #include <stdio.h>
+#include "list.h"
+#include "console.h"
 
 typedef struct{
     char *name; //char pointer, need free
@@ -9,7 +9,7 @@ typedef struct{
 
 //return pointer of LIST see `git branch BR_01`
 //this version is better than that
-void init_users(LIST *users); 
+void init_users(LIST *users);
 
 void destroy_users(LIST *users);
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "view.h"
-#include "utils.h"
+#include "simple_timer.h"
 #include "ctrl.h"
 
 
@@ -55,11 +55,11 @@ static void _ui_timer_call(void *env){// implement animation
             erase_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
             ui->tick_count++;
             break;
-        // case 1:
-        //     draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
-        //     ui->tick_count++;
-        //     break;
         case 1:
+            draw_highlight(FRM_TOP, ui->frame_left, lines, lines_size);
+            ui->tick_count++;
+            break;
+        case 2:
             timer_stop(&ui->timer);
             draw_panel(FRM_TOP, ui->frame_left, ui->game->panel);
             draw_panel_block(FRM_TOP, ui->frame_left, &ui->game->cur_block);

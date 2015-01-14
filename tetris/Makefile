@@ -1,16 +1,16 @@
 COMPILER = gcc
 IDIR = ../utils
 CXXFLAGS += -I$(IDIR)
-OBJECTS = ctrl.o view.o game.o utils.o
+OBJECTS = ctrl.o view.o game.o console.o simple_timer.o
 
 tetris_single: $(OBJECTS) tetris_single.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_single.o -lm -lpthread -o tetris_single
+	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_single.o -lm -o tetris_single
 
 tetris_single2: $(OBJECTS) tetris_single2.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_single2.o -lm -lpthread -o tetris_single2
+	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_single2.o -lm -o tetris_single2
 
 tetris_double: $(OBJECTS) tetris_double.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_double.o -lm -lpthread -o tetris_double
+	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_double.o -lm -o tetris_double
 
 tetris_single.o: tetris_single.c
 	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
@@ -30,7 +30,10 @@ view.o: view.c
 game.o: game.c
 	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
-utils.o: $(IDIR)/utils.c
+console.o: $(IDIR)/console.c
+	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+
+simple_timer.o: $(IDIR)/simple_timer.c
 	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
 clean:

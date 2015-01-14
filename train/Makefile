@@ -1,7 +1,7 @@
 COMPILER = gcc
 IDIR = ../utils
 CXXFLAGS += -I$(IDIR)
-OBJECTS = user.o train.o menu.o list.o utils.o
+OBJECTS = user.o train.o menu.o list.o console.o
 
 app: $(OBJECTS) app.o
 	$(COMPILER) $(CXXFLAGS) $(OBJECTS) app.o -o app
@@ -21,7 +21,7 @@ menu.o: $(IDIR)/menu.c
 list.o: $(IDIR)/list.c
 	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
-utils.o: $(IDIR)/utils.c
+console.o: $(IDIR)/console.c
 	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
 clean:

@@ -5,9 +5,9 @@
 
 ![Screenshot2.png](./Screenshot2.png)
 
-- 基础helper工具类，与具体应用无关，可重用，在`..\utils\utils.c`中
-    + `DEBUG_WRITE`的实现
-    + `SIMPER_TIMER`的实现，实现了可注册多个时间响应函数，响应函数可接受一个`void*`的数据，由于C不存在内嵌函数及闭包，必要的上下文则由该参数来保持（该上下文由创建者来指定）
+- 基础helper工具类，与具体应用无关，可重用，在`..\utils`中
+    + `console.c`的实现，用于输出调试信息
+    + `simple_timer.c`的实现，实现了可注册多个时间响应函数，响应函数可接受一个`void*`的数据，由于C不存在内嵌函数及闭包，必要的上下文则由该参数来保持（该上下文由创建者来指定）
     + `vt_code`，`termios`的相关封装，参考了网上的例子
 - __模型层__：`BLOCK`，`GAME`的实现，它们只有逻辑部分，不包含UI交互
     + 它们可被单独测试，测试代码在`test_game.c`中
@@ -25,4 +25,4 @@
     + 模型层发生的变化，借由`GAME_UI`来绘制UI，后者承担`GAME`与`view`之间的联系，由一系列函数指针组成的结构体，充担高级语言中的接口的概念
 - 避免了全局变量的存在，方便在单人应用`tetris_single`与双人应用`tetris_double`使用同一套逻辑
 
-> 运行时监控，`gcc -I ../utils ../utils/utils.c game.c view.c ctrl.c tetris_single.c -o tetris_single.out -lm -lpthread -DDEBUG && ./tetris_single.out 2>>debug.log`，并同时启动`tail f debug.log`
+> 运行时监控，`gcc -I../utils ../utils/console.c ../utils/simple_timer.c game.c view.c ctrl.c tetris_single.c -o tetris_single.out -lm -lpthread -DDEBUG && ./tetris_single.out 2>>debug.log`，并同时启动`tail f debug.log`

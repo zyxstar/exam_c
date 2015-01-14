@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils.h"
+#include "console.h"
 #include "game.h"
 
 ////////////////////////////////////////
@@ -287,5 +287,5 @@ int main(int argc, const char* argv[]){
     return 0;
 }
 
-// gcc -I../../utils -I../ ../../utils/utils.c test_game.c ../game.c -o test_game.out -DDEBUG -lm -lpthread && ./test_game.out
-// gcc -I../../utils -I../ ../../utils/utils.c test_game.c ../game.c -o test_game.out -DDEBUG -lm -lpthread && ./test_game.out > test.log
+// gcc -I../../utils -I../ ../../utils/console.c ../../utils/simple_timer.c test_game.c ../game.c -o test_game.out -DDEBUG -lm && ./test_game.out
+// gcc -I../../utils -I../ ../../utils/console.c ../../utils/simple_timer.c test_game.c ../game.c -o test_game.out -DDEBUG -lm && ./test_game.out 2> test.log

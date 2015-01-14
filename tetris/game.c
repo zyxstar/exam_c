@@ -44,7 +44,7 @@ GAME* game_init(GAME_UI *ui){
     game->next_block = _rand_block();
 
     timer_new(&game->timer, 1000, _timer_hander_fn, game);
-    pthread_mutex_init(&game->mutex, NULL);
+    // pthread_mutex_init(&game->mutex, NULL);
     DEBUG_WRITE(("game_init end\n"));
     return game;
 }
@@ -321,7 +321,7 @@ static BOOL _check_game_over(GAME *game){
 void game_over(GAME *game){
     DEBUG_WRITE(("game_over begin\n"));
     timer_stop(&game->timer);
-    pthread_mutex_destroy(&game->mutex);
+    // pthread_mutex_destroy(&game->mutex);
 
     game->is_over = TRUE;
     game->ui->draw_game_over(game->ui);
@@ -342,10 +342,10 @@ BOOL game_move_down(GAME *game){
     if(game->is_over || game->is_pause) return FALSE;
     DEBUG_WRITE(("game_move_down begin\n"));
 
-    pthread_mutex_lock(&game->mutex);
+    // pthread_mutex_lock(&game->mutex);
     POS down = {0, 1};
     BOOL is_moved = _move(game, down);
-    
+
     if(!is_moved){ //when down finished
         if(_check_game_over(game))
             game_over(game);
@@ -357,7 +357,7 @@ BOOL game_move_down(GAME *game){
     else{
         game->cur_block.down_count++;
     }
-    pthread_mutex_unlock(&game->mutex);
+    // pthread_mutex_unlock(&game->mutex);
     DEBUG_WRITE(("game_move_down end: [is_moved]%s\n", human_bool(is_moved)));
     return is_moved;
 }

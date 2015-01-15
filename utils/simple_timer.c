@@ -12,6 +12,9 @@ static struct{
     SIMPER_TIMER *timer_queue[64];
 } GLOBAL_TIMER_QUEUE;
 
+static struct itimerval tv, otv;
+static struct sigaction act, oldact;
+
 void _timer_set_callee_name(SIMPER_TIMER *timer, char *file, int line, char *name){
     snprintf(timer->callee_name, 256, "%s:%d:%s", file, line, name);
 }
@@ -39,7 +42,8 @@ void _timer_new(SIMPER_TIMER *timer, int interval, void(*callee_fn)(void *env), 
     DEBUG_WRITE(("timer_new: [callee_name]%s [interval]%d\n", timer->callee_name, timer->interval));
 }
 
-static void _timer_wrap_callee_fn(){
+static void _timer_wrap_callee_fn(int sig){
+    // sigaddset(&act.sa_mask, SIGALRM);
     int i;
     SIMPER_TIMER *timer;
     for(i = 0; i < GLOBAL_TIMER_QUEUE.size; i++){
@@ -48,17 +52,19 @@ static void _timer_wrap_callee_fn(){
         timer->count++;
         if(timer->count % (timer->interval / 10) == 0 && timer->count / (timer->interval / 10) > 0){
             DEBUG_WRITE(("timer_call begin: [callee_name]%s [interval]%d\n", timer->callee_name, timer->interval));
+
             timer->callee_fn(timer->env);
+
             DEBUG_WRITE(("timer_call end: [callee_name]%s [interval]%d\n", timer->callee_name, timer->interval));
         }
     }
-    signal(SIGALRM, _timer_wrap_callee_fn);
 }
 
 void timer_start(SIMPER_TIMER *timer){
     if(!GLOBAL_TIMER_QUEUE.is_start){
-        signal(SIGALRM, _timer_wrap_callee_fn);
-        struct itimerval tv, otv;
+        act.sa_handler = _timer_wrap_callee_fn;
+        sigaction(SIGALRM, &act, &oldact);
+
         tv.it_value.tv_sec = 0;
         tv.it_value.tv_usec = 10000;
         //after the first time, how long to run next time

@@ -3,7 +3,7 @@
 #include "student.h"
 #include "class.h"
 #include "grade.h"
-#include "event.h"
+
 
 
 
@@ -195,5 +195,5 @@ int main(){
 }
 
 
-// gcc -I ../utils ../utils/event.c student.c class.c grade.c test.c -o test.out && ./test.out
+// gcc -I../utils ../utils/event.c student.c class.c grade.c test.c -o test.out && ./test.out
 

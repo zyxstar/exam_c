@@ -1,5 +1,5 @@
-#include "console.h"
-#include "list.h"
+#include <console.h>
+#include <list.h>
 
 typedef struct{
     char name[20]; //char array, need't free

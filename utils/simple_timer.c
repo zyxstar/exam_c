@@ -2,8 +2,8 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <unistd.h>
+#include <console.h>
 #include "simple_timer.h"
-#include "console.h"
 
 
 static struct{

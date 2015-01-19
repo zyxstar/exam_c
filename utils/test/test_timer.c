@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "simple_timer.h"
+#include <simple_timer.h>
 // #include <signal.h>
 // #include <unistd.h>
 // #include <sys/time.h>

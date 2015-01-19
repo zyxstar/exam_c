@@ -2,8 +2,8 @@
 #define GAME_H_INCLUEDE
 
 // #include <pthread.h>
-#include "console.h"
-#include "simple_timer.h"
+#include <console.h>
+#include <simple_timer.h>
 
 
 #define ROWS (20)

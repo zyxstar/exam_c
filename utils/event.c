@@ -1,6 +1,6 @@
 #include <stdlib.h>
-#include "kernel_list.h"
-#include "kernel_list_helper.h"
+#include <kernel_list.h>
+#include <kernel_list_helper.h>
 #include "event.h"
 
 typedef struct{

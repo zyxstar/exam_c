@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "list.h"
-#include "console.h"
+#include <list.h>
+#include <console.h>
 
 typedef struct{
     char *name; //char pointer, need free

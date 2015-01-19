@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <console.h>
 #include "view.h"
-#include "console.h"
 
 #define BUF_LEN (20)
 

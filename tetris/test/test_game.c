@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "console.h"
+#include <console.h>
 #include "game.h"
 
 ////////////////////////////////////////

@@ -2,7 +2,7 @@
 #define GRADE_H_INCLUEDE
 
 #include <stdio.h>
-#include "kernel_list.h"
+#include <kernel_list.h>
 #include "class.h"
 
 typedef struct GRADE_TAG GRADE;

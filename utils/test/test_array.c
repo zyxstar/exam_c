@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "array.h"
-#include "list.h"
+#include <array.h>
+#include <list.h>
 
 typedef void reduce_call1(int *, int *, int);
 void _reduce1(reduce_call1 *, int *arr, int size, int *stat);
@@ -197,4 +197,4 @@ int main(){
 }
 
 
-// gcc -I ../ ../list.c test_array.c -o test_array.out && ./test_array.out
+// gcc -I../ ../list.c test_array.c -o test_array.out && ./test_array.out

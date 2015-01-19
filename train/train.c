@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <list.h>
 #include "train.h"
-#include "list.h"
 
 static void _destroy_train(void *data){
     TRAIN *train = (TRAIN*)data;

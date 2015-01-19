@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "kernel_list.h"
-#include "kernel_list_helper.h"
+#include <kernel_list.h>
+#include <kernel_list_helper.h>
 #include "student.h"
 #include "class.h"
 #include "grade.h"

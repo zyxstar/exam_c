@@ -1,5 +1,5 @@
-#include "list.h"
-#include "console.h"
+#include <list.h>
+#include <console.h>
 
 
 typedef struct MENU_TAG{

@@ -2,9 +2,9 @@
 #define CLASS_H_INCLUEDE
 
 #include <stdio.h>
-#include "kernel_list.h"
+#include <kernel_list.h>
+#include <event.h>
 #include "student.h"
-#include "event.h"
 
 
 #define CLS_NAMESIZE 32

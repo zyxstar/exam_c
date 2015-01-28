@@ -103,23 +103,23 @@ void dirwalk(char *dir, void(*fcn)(char *)){
 // }
 
 int main(int argc, char **argv){
-    // fsize("/home/zyx/day01");
+    fsize(".");
 
-    int fd;
-    struct direct dirbuf;
-    fd = open("/home/zyx/", O_RDONLY, 0);
-    printf("%d\n", fd);
-    struct stat stbuf;
-    fstat(fd, &stbuf);
-    printf("%d\n", (stbuf.st_mode & S_IFMT) == S_IFDIR);
-    int i, j;
-    while(1){
-        i = read(fd, (char *)&dirbuf, sizeof(dirbuf));
-        printf("%d: %d\n", j++, i);
-        if(j == 10) break;
-    // printf("%d %c %s %d\n", dirbuf.d_ino, dirbuf.d_type, dirbuf.d_name, sizeof(dirbuf));
-    }
-    close(fd);
+    // int fd;
+    // struct direct dirbuf;
+    // fd = open("/home/zyx/", O_RDONLY, 0);
+    // printf("%d\n", fd);
+    // struct stat stbuf;
+    // fstat(fd, &stbuf);
+    // printf("%d\n", (stbuf.st_mode & S_IFMT) == S_IFDIR);
+    // int i, j;
+    // while(1){
+    //     i = read(fd, (char *)&dirbuf, sizeof(dirbuf));
+    //     printf("%d: %d\n", j++, i);
+    //     if(j == 10) break;
+    // // printf("%d %c %s %d\n", dirbuf.d_ino, dirbuf.d_type, dirbuf.d_name, sizeof(dirbuf));
+    // }
+    // close(fd);
     return 0;
 }
 

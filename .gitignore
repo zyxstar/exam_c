@@ -5,6 +5,6 @@
 *.result
 *.log
 *.swp
-
+*.DS_Store
 
 /exam

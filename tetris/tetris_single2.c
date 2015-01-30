@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <time.h>
 #include "ctrl.h"
+#include "view.h"
 
 // char _store_ch(char ch){ //stack
 //     static char buffer[10];

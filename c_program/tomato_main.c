@@ -16,4 +16,9 @@ int main(){
 // size tomato_main #查看段信息
 
 // nm tomato_main #查看符号
-// bss 非初始化数据段
+
+// cat /proc/cpuinfo 查看CPU的
+// cat /proc/meminfo 查看内存
+// cat /proc/swaps  查看swap分区信息
+// vmstat 3 每三秒钟捕获一次。第一行数据不用看，没有价值，它仅反映开机以来的平均性能。从第二行开始，反映每三秒钟之内的系统性能指标
+// free  可以看到总内存

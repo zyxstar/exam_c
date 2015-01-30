@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <time.h>
 #include "ctrl.h"
+#include "view.h"
 
 
 int main(){

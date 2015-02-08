@@ -1,0 +1,46 @@
+Installation of GCC
+Apply the patches:
+
+patch -Np1 -i ../gcc-2.95.3-2.patch &&
+patch -Np1 -i ../gcc-2.95.3-no-fixinc.patch &&
+patch -Np1 -i ../gcc-2.95.3-returntype-fix.patch
+The GCC development team recommends building in a separate directory.
+
+mkdir ../gcc-build &&
+cd ../gcc-build
+Configure GCC to build the C and C++ compilers and enable the related C++ options.
+
+../gcc-2.95.3/configure \
+--prefix=/opt/gcc-2.95.3 \
+--enable-shared --enable-languages=c,c++ \
+--enable-threads=posix
+Compile and install GCC:
+
+make bootstrap &&
+make install
+Make note of the library that is installed.
+
+L=`find /opt/gcc-2.95.3/lib -name "*libstdc++*.so" -type f` &&
+IL=`basename $L`
+Move the C++ libraries to the standard lib directory to avoid having to add /opt/gcc-2.95.3/lib to /etc/ld.so.conf.
+
+for i in /opt/gcc-2.95.3/lib/*.so*; do mv -f $i /usr/lib;
+ln -sf /usr/lib/`basename $i` /opt/gcc-2.95.3/lib; done
+Create symlinks required by commercial and precompiled packages.
+
+ln -sf $IL /usr/lib/libstdc++-libc6.1-1.so.2 &&
+ln -sf $IL /usr/lib/libstdc++-libc6.2-2.so.3 &&
+ln -sf $IL /usr/lib/libstdc++-libc6.3-2.so.3
+Configuring GCC
+Configuration Information
+
+As with most libraries, there is no configuration to do, save that the library directory i.e., /opt/lib or /usr/local/lib should appear in /etc/ld.so.conf so that ldd can find the shared libraries. After checking that this is the case, /sbin/ldconfig should be run while logged in as root.
+
+The instructions given above make compatibility symlinks that pre-compiled packages in BLFS require. You may create additional compatibility links based on your requirements.
+
+If you only need the GCC-2.95.3 libraries, you may delete /opt/gcc-2.95.3.
+
+Whenever you need to use GCC-2.95.3 instead of your system installed compiler, add /opt/gcc-2.95.3/bin to the front of your PATH or (preferably) set the CC environment variable before compiling the concerned package.
+
+Contents
+The GCC-2.95.3 package contains the gcc-2.95.3 C and C++ compilers and GCC-2.95.3 libstdc++.so that is required by some commercial and pre-compiled packages.

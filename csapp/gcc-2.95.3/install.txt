@@ -44,3 +44,15 @@ Whenever you need to use GCC-2.95.3 instead of your system installed compiler, a
 
 Contents
 The GCC-2.95.3 package contains the gcc-2.95.3 C and C++ compilers and GCC-2.95.3 libstdc++.so that is required by some commercial and pre-compiled packages.
+
+
+
+如果用的比较老版本gcc (比如gcc-2.95.3) 在配置过程中会提示这样的错误:
+Config.guess failed to determine the host type.  You need to specify one.
+这是由于config.guess, config.sub版本太老. config.guess是用来检测host类型的, 运行它就能得知host类型.
+解决方法: 到ftp://ftp.gnu.org/pub/pub/gnu/config/下载新版的config.guess和config.sub:
+ http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.guess
+ http://savannah.gnu.org/cgi-bin/viewcvs/*checkout*/config/config/config.sub
+用它们替换gcc-2.95.3目录下的老文件.
+现在运行 $./config.guess:
+i686-pc-linux-gnu

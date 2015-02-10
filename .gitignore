@@ -1,6 +1,4 @@
 *.i
-*.s
-*.o
 *.out
 *.result
 *.log

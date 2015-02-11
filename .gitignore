@@ -1,5 +1,8 @@
 *.i
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9eb5152a2fa2ba12f271a0ec3940d2e60e01e0ef
 *.out
 *.result
 *.log

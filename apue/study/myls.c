@@ -8,14 +8,16 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
-
-
-
+#include <setjmp.h>
+#include <assert.h>
+#include "list.h"
 
 #define STAT_SIZE 256
-#define UID_SIZE 20
-#define GID_SIZE 20
-#define TIME_SIZE 20
+#define INO_SIZE 32
+#define UNM_SIZE 32
+#define GNM_SIZE 32
+#define TIME_SIZE 32
+#define FILENM_SIZE 256
 
 
 enum SHOW_OPTIONS{
@@ -24,11 +26,29 @@ enum SHOW_OPTIONS{
     SHOW_INODE = 1 << 2
 };
 
+struct ls_entry{
+    char ino[INO_SIZE];
+    char typ;
+    char perms[10];
+    char user[UNM_SIZE];
+    char group[GNM_SIZE];
+    off_t size;
+    char mtime[TIME_SIZE];
+    char filenm[FILENM_SIZE];
+    char lnfilenm[FILENM_SIZE];
+    int bgcolor;
+    int fgcolor;
+    struct list_head node;
+};
+
 #define HAS_OPTION(setting, option) (((setting) & (option)) == (option))
 
 static void parse_argv(char **argv, char **path, int *options);
 static void trave_dir(char *path, int options);
-static void show_file(ino_t ino, const char *name, int options);
+static void process_file(const char *name, struct list_head *list);
+
+static jmp_buf  jmp_trave;
+static jmp_buf  jmp_process;
 
 int main(int argc, char **argv){
     int options = 0;
@@ -57,16 +77,62 @@ static void parse_argv(char **argv, char **path, int *options){
     }
 }
 
+static struct list_head *init_list(){
+    struct list_head *list = malloc(sizeof(*list));
+    assert(list != NULL);
+    INIT_LIST_HEAD(list);
+    return list;
+}
+
+static void destroy_list(struct list_head *list){
+    struct list_head *cur;
+    struct ls_entry *ls_ent;
+    __list_for_each(cur, list) {
+        ls_ent = list_entry(cur, struct ls_entry, node);
+        free(ls_ent);
+    }
+    free(list);
+}
+
+static void print_ls_entry(const struct ls_entry *entry){
+    printf("%s %c%s %s %s %ld %s %s %s\n", 
+        entry->ino, entry->typ, entry->perms, entry->user, entry->group,
+        entry->size, entry->mtime, entry->filenm, entry->lnfilenm);
+}
+
+
 static void trave_dir(char *path, int options){
     DIR *dir;
     struct dirent *entry;
 
     int ret_cd = 0;
+    struct stat st;
+
+    struct list_head *list = init_list();
+    struct list_head *cur;
+    struct ls_entry *ls_ent;
+
+    if (stat(path, &st)== -1) {
+        perror("stat()");
+        ret_cd = 1;
+        goto END;
+    }
+
+    if(!HAS_OPTION(st.st_mode, S_IFDIR)){
+        process_file(path, list);
+        goto SHOW;
+    }
+
     dir = opendir(path);
     if (dir == NULL) {
         perror("opendir()");
         ret_cd = 1;
         goto END;
+    }
+
+    if (setjmp(jmp_trave) != 0){
+        ret_cd = 1;
+        goto CLOSE_DIR;
     }
 
     if(chdir(path) == -1){
@@ -78,12 +144,22 @@ static void trave_dir(char *path, int options){
     while (1) {
         entry = readdir(dir);
         if (entry == NULL) break;
-        show_file(entry->d_ino, entry->d_name, options);
+        process_file(entry->d_name, list);
     }
+
+SHOW:
+
+    __list_for_each(cur, list) {
+        ls_ent = list_entry(cur, struct ls_entry, node);
+        print_ls_entry(ls_ent);
+    }
+
 
 CLOSE_DIR:
     closedir(dir);
+
 END:
+    destroy_list(list);
     exit(ret_cd);
 }
 
@@ -143,22 +219,22 @@ static void get_file_perm(mode_t mode, char *perm_str){
 }
 
 
-static void get_file_username(uid_t uid, char *uid_str){
+static void get_file_username(uid_t uid, char *unm_str){
     struct passwd *pwd = getpwuid(uid);
     if(pwd == NULL){
         perror("getpwuid()");
-        exit(1);
+        longjmp(jmp_process, 1);
     }
-    strncpy(uid_str, pwd->pw_name, UID_SIZE);
+    strncpy(unm_str, pwd->pw_name, UNM_SIZE);
 }
 
-static void get_file_groupname(gid_t gid, char *gid_str){
+static void get_file_groupname(gid_t gid, char *gnm_str){
     struct group *grp = getgrgid(gid);
     if(grp == NULL){
         perror("getgrgid()");
-        exit(1);
+        longjmp(jmp_process, 2);
     }
-    strncpy(gid_str, grp->gr_name, GID_SIZE);
+    strncpy(gnm_str, grp->gr_name, GNM_SIZE);
 }
 
 static void get_file_time(time_t mtime, char *time_str){
@@ -173,60 +249,77 @@ static void get_file_time(time_t mtime, char *time_str){
         strftime(time_str, TIME_SIZE, "%b %d %R", ltm);
 }
 
-
-static void get_stat(struct stat st, char *stat_str){
-    char t = get_file_type(st.st_mode & S_IFMT);
-
-    char perm_str[9] = "---------";
-    get_file_perm(st.st_mode, perm_str);
-
-    char uid_str[UID_SIZE];
-    get_file_username(st.st_uid, uid_str);
-
-    char gid_str[GID_SIZE];
-    get_file_groupname(st.st_gid, gid_str);
-
-    char time_str[TIME_SIZE];
-    get_file_time(st.st_mtime, time_str);
-
-    snprintf(stat_str, STAT_SIZE, "%c%s %s %s %10ld %s ",
-            t, perm_str, uid_str, gid_str, st.st_size, time_str);
+static void get_link_filenm(const char *name, char *lnfilenm){
+    ssize_t size = readlink(name, lnfilenm, FILENM_SIZE);
+    if(size == -1){
+        perror("readlink()");
+        longjmp(jmp_process, 3);
+    }
+    printf("%d\n", size);
+    if(size == FILENM_SIZE) lnfilenm[FILENM_SIZE - 1] = '\0';
+    else lnfilenm[size] = '\0';
 }
 
+static void process_file(const char *name, struct list_head *list){
+    // int is_show_long = HAS_OPTION(options, SHOW_LONG);
+    // int is_show_all = HAS_OPTION(options, SHOW_ALL);
+    // int is_show_inode = HAS_OPTION(options, SHOW_INODE);
 
-
-static void show_file(ino_t ino, const char *name, int options){
-    int is_show_long = HAS_OPTION(options, SHOW_LONG);
-    int is_show_all = HAS_OPTION(options, SHOW_ALL);
-    int is_show_inode = HAS_OPTION(options, SHOW_INODE);
-
-
-    if(!is_show_all && name[0] == '.')
-        return;
-
-    if(is_show_inode)
-        printf("%-8ld", ino);
-
-    if(!is_show_long){
-        goto SHOW_NAME;
-    }
-
+    struct ls_entry *entry = malloc(sizeof(*entry));
+    assert(entry != NULL);
     struct stat st;
-    int ret;
 
-    ret = stat(name, &st);
-    if (ret == -1) {
-        perror(name);
-        exit(1);
+    if (setjmp(jmp_process) != 0){
+        goto ERROR;
     }
 
-    char stat_str[STAT_SIZE];
-    get_stat(st, stat_str);
-    printf("%s ", stat_str);
+    if (lstat(name, &st) == -1) {
+        perror("stat()");
+        goto ERROR;        
+    }
 
-SHOW_NAME:
-    //if(is_show_long && st->)
-        printf("%s\n", name);
+    snprintf(entry->ino, INO_SIZE, "%ld", st.st_ino);
+    entry->typ = get_file_type(st.st_mode & S_IFMT);
+
+    strncpy(entry->perms, "---------", 10);
+    get_file_perm(st.st_mode, entry->perms);
+
+    get_file_username(st.st_uid, entry->user);
+    get_file_groupname(st.st_gid, entry->group);
+
+    entry->size = st.st_size;
+
+    get_file_time(st.st_mtime, entry->mtime);
+    strncpy(entry->filenm, name, FILENM_SIZE);
+
+    if(entry->typ == 'l'){
+        get_link_filenm(name, entry->lnfilenm);
+    }
+
+    
+
+    list_add(&entry->node, list);
+    return;
+
+ERROR:
+    free(entry);
+    longjmp(jmp_trave, 1);
+
+
+//     if(!is_show_all && name[0] == '.')
+//         return;
+
+//     // if(is_show_inode)
+//     //     printf("%-ld ", ino);
+
+//     if(!is_show_long){
+//         goto SHOW_NAME;
+//     }
+
+
+// SHOW_NAME:
+//     //if(is_show_long && st->)
+//         printf("%s\n", name);
 }
 
 

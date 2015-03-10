@@ -245,40 +245,40 @@ static char get_file_type(mode_t mode){
 }
 
 static void get_file_perm(mode_t mode, char *perm_str){
-	if(HAS_OPTION(mode, S_IRUSR))
-		perm_str[0]='r';
-	if(HAS_OPTION(mode, S_IWUSR))
-		perm_str[1]='w';
-	if(HAS_OPTION(mode, S_IXUSR))
-		perm_str[2]='x';
+    if(HAS_OPTION(mode, S_IRUSR))
+        perm_str[0]='r';
+    if(HAS_OPTION(mode, S_IWUSR))
+        perm_str[1]='w';
+    if(HAS_OPTION(mode, S_IXUSR))
+        perm_str[2]='x';
     if(HAS_OPTION(mode, S_ISUID))
         perm_str[2]='S';
-	if(HAS_OPTION(mode, S_IXUSR|S_ISUID))
-		perm_str[2]='s';
+    if(HAS_OPTION(mode, S_IXUSR|S_ISUID))
+        perm_str[2]='s';
 
 
-	if(HAS_OPTION(mode, S_IRGRP))
-		perm_str[3]='r';
-	if(HAS_OPTION(mode, S_IWGRP))
-		perm_str[4]='w';
-	if(HAS_OPTION(mode, S_IXGRP))
-		perm_str[5]='x';
+    if(HAS_OPTION(mode, S_IRGRP))
+        perm_str[3]='r';
+    if(HAS_OPTION(mode, S_IWGRP))
+        perm_str[4]='w';
+    if(HAS_OPTION(mode, S_IXGRP))
+        perm_str[5]='x';
     if(HAS_OPTION(mode, S_ISGID))
         perm_str[5]='S';
     if(HAS_OPTION(mode, S_IXGRP|S_ISGID))
         perm_str[5]='s';
 
 
-	if(HAS_OPTION(mode, S_ISGID))
-		perm_str[5]='s';
-	if(HAS_OPTION(mode, S_IROTH))
-		perm_str[6]='r';
-	if(HAS_OPTION(mode, S_IWOTH))
-		perm_str[7]='w';
-	if(HAS_OPTION(mode, S_IXOTH))
-		perm_str[8]='x';
-	if(HAS_OPTION(mode, S_ISVTX))
-		perm_str[8]='T';
+    if(HAS_OPTION(mode, S_ISGID))
+        perm_str[5]='s';
+    if(HAS_OPTION(mode, S_IROTH))
+        perm_str[6]='r';
+    if(HAS_OPTION(mode, S_IWOTH))
+        perm_str[7]='w';
+    if(HAS_OPTION(mode, S_IXOTH))
+        perm_str[8]='x';
+    if(HAS_OPTION(mode, S_ISVTX))
+        perm_str[8]='T';
     if(HAS_OPTION(mode, S_IXOTH|S_ISVTX))
         perm_str[8]='t';
 }

@@ -35,6 +35,7 @@ struct ls_entry{
     ino_t ino;
     char typ;
     char perms[10];
+    nlink_t nlink;
     char user[UNM_SIZE];
     char group[GNM_SIZE];
     off_t size;
@@ -46,10 +47,11 @@ struct ls_entry{
 };
 
 struct ls_entry_max{
-    int ino;
+    ino_t ino;
+    nlink_t nlink;
     int user_len;
     int group_len;
-    int size;
+    off_t size;
 };
 
 static int COUNT = 0;
@@ -122,12 +124,13 @@ static void print_ls_entry(const struct ls_entry *entry, int options, struct ls_
         printf("%*ld ", (int)log10(max.ino) + 1, entry->ino);
 
     if(HAS_OPTION(options, SHOW_LONG))
-        printf("%c%s %-*s %-*s %*ld %s ",
+        printf("%c%s %*ld %-*s %-*s %*ld %s ",
             entry->typ, entry->perms,
+            (int)log10(max.nlink) + 1, entry->nlink,
             max.user_len, entry->user,
             max.group_len, entry->group,
-            (int)log10(max.size) + 1,
-            entry->size, entry->mtime);
+            (int)log10(max.size) + 1, entry->size,
+            entry->mtime);
 
     printf("\033[%sm%s\033[0m ", entry->color, entry->filenm);
 
@@ -155,6 +158,7 @@ static void show_ls_entries(struct list_head *list, int options){
         sort_list[idx++] = ls_ent;
 
         if(ls_ent->ino > max.ino) max.ino = ls_ent->ino;
+        if(ls_ent->nlink > max.nlink) max.nlink = ls_ent->nlink;
         if(strlen(ls_ent->user) > max.user_len) max.user_len = strlen(ls_ent->user);
         if(strlen(ls_ent->group) > max.group_len) max.group_len = strlen(ls_ent->group);
         if(ls_ent->size > max.size) max.size = ls_ent->size;
@@ -378,6 +382,8 @@ static void process_file(const char *name, struct list_head *list, char *ls_colo
     }
 
     entry->ino = st.st_ino;
+    entry->nlink = st.st_nlink;
+
     entry->typ = get_file_type(st.st_mode & S_IFMT);
 
     strncpy(entry->perms, "---------", 10);

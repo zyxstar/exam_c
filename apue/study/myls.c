@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -10,15 +11,19 @@
 #include <time.h>
 #include <setjmp.h>
 #include <assert.h>
+#include <math.h>
+
 #include "list.h"
 
-#define STAT_SIZE 256
-#define INO_SIZE 32
+
 #define UNM_SIZE 32
 #define GNM_SIZE 32
 #define TIME_SIZE 32
+#define TOKEN_SIZE 32
 #define FILENM_SIZE 256
+#define COLOR_SIZE 10
 
+#define HAS_OPTION(setting, option) (((setting) & (option)) == (option))
 
 enum SHOW_OPTIONS{
     SHOW_ALL = 1,
@@ -27,7 +32,7 @@ enum SHOW_OPTIONS{
 };
 
 struct ls_entry{
-    char ino[INO_SIZE];
+    ino_t ino;
     char typ;
     char perms[10];
     char user[UNM_SIZE];
@@ -36,16 +41,23 @@ struct ls_entry{
     char mtime[TIME_SIZE];
     char filenm[FILENM_SIZE];
     char lnfilenm[FILENM_SIZE];
-    int bgcolor;
-    int fgcolor;
+    char color[COLOR_SIZE];
     struct list_head node;
 };
 
-#define HAS_OPTION(setting, option) (((setting) & (option)) == (option))
+struct ls_entry_max{
+    int ino;
+    int user_len;
+    int group_len;
+    int size;
+};
+
+static int COUNT = 0;
 
 static void parse_argv(char **argv, char **path, int *options);
-static void trave_dir(char *path, int options);
-static void process_file(const char *name, struct list_head *list);
+static char *load_ls_colors();
+static int trave_dir(char *path, int options, char *ls_colors);
+static void process_file(const char *name, struct list_head *list, char *ls_colors);
 
 static jmp_buf  jmp_trave;
 static jmp_buf  jmp_process;
@@ -55,7 +67,10 @@ int main(int argc, char **argv){
     char *path = ".";
 
     parse_argv(argv, &path, &options);
-    trave_dir(path, options);
+    char *ls_colors = load_ls_colors();
+    int ret = trave_dir(path, options, ls_colors);
+    free(ls_colors);
+    return ret;
 }
 
 static void parse_argv(char **argv, char **path, int *options){
@@ -77,6 +92,13 @@ static void parse_argv(char **argv, char **path, int *options){
     }
 }
 
+static char *load_ls_colors(){
+    char *colors = getenv("LS_COLORS");
+    if(colors == NULL) return NULL;
+    return strdup(colors);
+}
+
+
 static struct list_head *init_list(){
     struct list_head *list = malloc(sizeof(*list));
     assert(list != NULL);
@@ -94,23 +116,66 @@ static void destroy_list(struct list_head *list){
     free(list);
 }
 
-static void print_ls_entry(const struct ls_entry *entry){
-    printf("%s %c%s %s %s %ld %s %s %s\n", 
-        entry->ino, entry->typ, entry->perms, entry->user, entry->group,
-        entry->size, entry->mtime, entry->filenm, entry->lnfilenm);
+static void print_ls_entry(const struct ls_entry *entry, int options, struct ls_entry_max max){
+    if(!HAS_OPTION(options, SHOW_ALL) && entry->filenm[0] == '.') return;
+    if(HAS_OPTION(options, SHOW_INODE))
+        printf("%*ld ", (int)log10(max.ino) + 1, entry->ino);
+
+    if(HAS_OPTION(options, SHOW_LONG))
+        printf("%c%s %-*s %-*s %*ld %s ",
+            entry->typ, entry->perms,
+            max.user_len, entry->user,
+            max.group_len, entry->group,
+            (int)log10(max.size) + 1,
+            entry->size, entry->mtime);
+
+    printf("\033[%sm%s\033[0m ", entry->color, entry->filenm);
+
+    if(HAS_OPTION(options, SHOW_LONG) && entry->typ == 'l')
+        printf("> %s", entry->lnfilenm);
+
+    printf("\n");
+}
+
+int ls_entry_cmp(const void *data1, const void *data2){
+    struct ls_entry **ent1 = (struct ls_entry **)data1;
+    struct ls_entry **ent2 = (struct ls_entry **)data2;
+    return strcasecmp((*ent1)->filenm, (*ent2)->filenm);
+}
+
+static void show_ls_entries(struct list_head *list, int options){
+    struct list_head *cur;
+    struct ls_entry *ls_ent;
+
+    struct ls_entry **sort_list = malloc(sizeof(struct ls_entry *) * COUNT);
+    int idx = 0;
+    struct ls_entry_max max = {0};
+    __list_for_each(cur, list) {
+        ls_ent = list_entry(cur, struct ls_entry, node);
+        sort_list[idx++] = ls_ent;
+
+        if(ls_ent->ino > max.ino) max.ino = ls_ent->ino;
+        if(strlen(ls_ent->user) > max.user_len) max.user_len = strlen(ls_ent->user);
+        if(strlen(ls_ent->group) > max.group_len) max.group_len = strlen(ls_ent->group);
+        if(ls_ent->size > max.size) max.size = ls_ent->size;
+    }
+
+    qsort(sort_list, COUNT, sizeof(struct ls_entry *), ls_entry_cmp);
+    for(idx = 0; idx < COUNT; idx++){
+        print_ls_entry(sort_list[idx], options, max);
+    }
+    free(sort_list);
 }
 
 
-static void trave_dir(char *path, int options){
-    DIR *dir;
-    struct dirent *entry;
+static int trave_dir(char *path, int options, char *ls_colors){
+    static DIR *dir = NULL;
+    static int ret_cd = 0;
 
-    int ret_cd = 0;
+    struct dirent *entry;
     struct stat st;
 
     struct list_head *list = init_list();
-    struct list_head *cur;
-    struct ls_entry *ls_ent;
 
     if (stat(path, &st)== -1) {
         perror("stat()");
@@ -118,9 +183,18 @@ static void trave_dir(char *path, int options){
         goto END;
     }
 
+    if (setjmp(jmp_trave) != 0){
+        ret_cd = 1;
+        if (dir != NULL)
+            goto CLOSE_DIR;
+        else
+            goto DESTORY_LIST;
+    }
+
     if(!HAS_OPTION(st.st_mode, S_IFDIR)){
-        process_file(path, list);
-        goto SHOW;
+        process_file(path, list, ls_colors);
+        show_ls_entries(list, options);
+        goto DESTORY_LIST;
     }
 
     dir = opendir(path);
@@ -128,11 +202,6 @@ static void trave_dir(char *path, int options){
         perror("opendir()");
         ret_cd = 1;
         goto END;
-    }
-
-    if (setjmp(jmp_trave) != 0){
-        ret_cd = 1;
-        goto CLOSE_DIR;
     }
 
     if(chdir(path) == -1){
@@ -144,23 +213,19 @@ static void trave_dir(char *path, int options){
     while (1) {
         entry = readdir(dir);
         if (entry == NULL) break;
-        process_file(entry->d_name, list);
+        process_file(entry->d_name, list, ls_colors);
     }
 
-SHOW:
-
-    __list_for_each(cur, list) {
-        ls_ent = list_entry(cur, struct ls_entry, node);
-        print_ls_entry(ls_ent);
-    }
-
+    show_ls_entries(list, options);
 
 CLOSE_DIR:
     closedir(dir);
 
-END:
+DESTORY_LIST:
     destroy_list(list);
-    exit(ret_cd);
+
+END:
+    return ret_cd;
 }
 
 
@@ -176,7 +241,7 @@ static char get_file_type(mode_t mode){
     int flags[] = {S_IFSOCK, S_IFLNK, S_IFREG, S_IFBLK, S_IFDIR, S_IFCHR, S_IFIFO};
     char *types = "sl-bdcp";
     int idx = get_idx_of_arr(flags, sizeof(flags) / sizeof(int), mode);
-    return idx == -1 ? ' ' :  types[idx];
+    return idx == -1 ? '-' :  types[idx];
 }
 
 static void get_file_perm(mode_t mode, char *perm_str){
@@ -213,9 +278,9 @@ static void get_file_perm(mode_t mode, char *perm_str){
 	if(HAS_OPTION(mode, S_IXOTH))
 		perm_str[8]='x';
 	if(HAS_OPTION(mode, S_ISVTX))
-		perm_str[8]='S';
+		perm_str[8]='T';
     if(HAS_OPTION(mode, S_IXOTH|S_ISVTX))
-        perm_str[8]='s';
+        perm_str[8]='t';
 }
 
 
@@ -243,10 +308,10 @@ static void get_file_time(time_t mtime, char *time_str){
     int y = ntm->tm_year;
 
     struct tm *ltm = localtime(&mtime);
-    if(ltm->tm_year < y)
-        strftime(time_str, TIME_SIZE, "%b %d  %Y", ltm);
-    else
+    if(ltm->tm_year == y)
         strftime(time_str, TIME_SIZE, "%b %d %R", ltm);
+    else
+        strftime(time_str, TIME_SIZE, "%b %d  %Y", ltm);
 }
 
 static void get_link_filenm(const char *name, char *lnfilenm){
@@ -255,16 +320,50 @@ static void get_link_filenm(const char *name, char *lnfilenm){
         perror("readlink()");
         longjmp(jmp_process, 3);
     }
-    printf("%d\n", size);
     if(size == FILENM_SIZE) lnfilenm[FILENM_SIZE - 1] = '\0';
     else lnfilenm[size] = '\0';
 }
 
-static void process_file(const char *name, struct list_head *list){
-    // int is_show_long = HAS_OPTION(options, SHOW_LONG);
-    // int is_show_all = HAS_OPTION(options, SHOW_ALL);
-    // int is_show_inode = HAS_OPTION(options, SHOW_INODE);
+static void get_ls_color_item(char *ls_colors, char *nm, char *color){
+    char *ls_colors_dup = strdup(ls_colors);
 
+    char *outer_ptr = NULL;
+    char *inner_ptr = NULL;
+
+    char *tok, *sub_tok;
+    char *val = NULL;
+    for(tok = strtok_r(ls_colors_dup, ":", &outer_ptr); tok != NULL; tok = strtok_r(NULL, ":", &outer_ptr)){
+        for(sub_tok = strtok_r(tok, "=", &inner_ptr); sub_tok != NULL; sub_tok = strtok_r(NULL, "=", &inner_ptr)){
+            if(strcmp(nm, sub_tok) == 0){
+                val = strtok_r(NULL, "=", &inner_ptr);
+                strncpy(color, val, COLOR_SIZE);
+                goto FREE;
+            }
+        }
+    }
+FREE:
+    free(ls_colors_dup);
+}
+
+static void fill_colors(struct ls_entry *entry, char *ls_colors){
+    if(entry->perms[2] == 'x' || entry->perms[5] == 'x' || entry->perms[8] == 'x')
+        get_ls_color_item(ls_colors, "ex", entry->color);
+    switch(entry->typ){
+        case 'd' : get_ls_color_item(ls_colors, "di", entry->color); break;
+        case 'l' : get_ls_color_item(ls_colors, "ln", entry->color); break;
+        case 'b' : get_ls_color_item(ls_colors, "bd", entry->color); break;
+        case 'c' : get_ls_color_item(ls_colors, "cd", entry->color); break;
+    }
+    if(entry->perms[2] == 'S' || entry->perms[2] == 's')
+        get_ls_color_item(ls_colors, "su", entry->color);
+    if(entry->perms[5] == 'S' || entry->perms[5] == 's')
+        get_ls_color_item(ls_colors, "sg", entry->color);
+    if(entry->perms[8] == 'T' || entry->perms[8] == 't')
+        get_ls_color_item(ls_colors, "st", entry->color);
+
+}
+
+static void process_file(const char *name, struct list_head *list, char *ls_colors){
     struct ls_entry *entry = malloc(sizeof(*entry));
     assert(entry != NULL);
     struct stat st;
@@ -275,10 +374,10 @@ static void process_file(const char *name, struct list_head *list){
 
     if (lstat(name, &st) == -1) {
         perror("stat()");
-        goto ERROR;        
+        goto ERROR;
     }
 
-    snprintf(entry->ino, INO_SIZE, "%ld", st.st_ino);
+    entry->ino = st.st_ino;
     entry->typ = get_file_type(st.st_mode & S_IFMT);
 
     strncpy(entry->perms, "---------", 10);
@@ -292,35 +391,23 @@ static void process_file(const char *name, struct list_head *list){
     get_file_time(st.st_mtime, entry->mtime);
     strncpy(entry->filenm, name, FILENM_SIZE);
 
+    memset(entry->lnfilenm, '\0', FILENM_SIZE);
     if(entry->typ == 'l'){
         get_link_filenm(name, entry->lnfilenm);
     }
 
-    
+    strncpy(entry->color, "0", COLOR_SIZE);
+    fill_colors(entry, ls_colors);
 
     list_add(&entry->node, list);
+    COUNT++;
     return;
 
 ERROR:
     free(entry);
     longjmp(jmp_trave, 1);
 
-
-//     if(!is_show_all && name[0] == '.')
-//         return;
-
-//     // if(is_show_inode)
-//     //     printf("%-ld ", ino);
-
-//     if(!is_show_long){
-//         goto SHOW_NAME;
-//     }
-
-
-// SHOW_NAME:
-//     //if(is_show_long && st->)
-//         printf("%s\n", name);
 }
 
 
-// gcc myls.c -o myls
+// gcc myls.c -o myls -lm

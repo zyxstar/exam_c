@@ -23,7 +23,7 @@
 #define FILENM_SIZE 256
 #define COLOR_SIZE 10
 
-#define HAS_OPTION(setting, option) (((setting) & (option)) == (option))
+#define HAS_BIT(settings, bit) (((settings) & (bit)) == (bit))
 
 enum SHOW_OPTIONS{
     SHOW_ALL = 1,
@@ -119,12 +119,12 @@ static void destroy_list(struct list_head *list){
 }
 
 static void print_ls_entry(const struct ls_entry *entry, int options, struct ls_entry_max max){
-    if(!HAS_OPTION(options, SHOW_ALL) && entry->filenm[0] == '.') return;
-    if(HAS_OPTION(options, SHOW_INODE))
+    if(!HAS_BIT(options, SHOW_ALL) && entry->filenm[0] == '.') return;
+    if(HAS_BIT(options, SHOW_INODE))
         printf("%*ld ", (int)log10(max.ino) + 1, entry->ino);
 
-    if(HAS_OPTION(options, SHOW_LONG))
-        printf("%c%s %*ld %-*s %-*s %*ld %s ",
+    if(HAS_BIT(options, SHOW_LONG))
+        printf("%c%s %*d %-*s %-*s %*ld %s ",
             entry->typ, entry->perms,
             (int)log10(max.nlink) + 1, entry->nlink,
             max.user_len, entry->user,
@@ -134,7 +134,7 @@ static void print_ls_entry(const struct ls_entry *entry, int options, struct ls_
 
     printf("\033[%sm%s\033[0m ", entry->color, entry->filenm);
 
-    if(HAS_OPTION(options, SHOW_LONG) && entry->typ == 'l')
+    if(HAS_BIT(options, SHOW_LONG) && entry->typ == 'l')
         printf("> %s", entry->lnfilenm);
 
     printf("\n");
@@ -195,7 +195,7 @@ static int trave_dir(char *path, int options, char *ls_colors){
             goto DESTORY_LIST;
     }
 
-    if(!HAS_OPTION(st.st_mode, S_IFDIR)){
+    if(!HAS_BIT(st.st_mode, S_IFDIR)){
         process_file(path, list, ls_colors);
         show_ls_entries(list, options);
         goto DESTORY_LIST;
@@ -232,58 +232,62 @@ END:
     return ret_cd;
 }
 
-
-static int get_idx_of_arr(int *arr, int size, int val){
-    int i;
-    for(i = 0; i < size; i++)
-        if(arr[i] == val) return i;
-    return -1;
-}
-
-
 static char get_file_type(mode_t mode){
-    int flags[] = {S_IFSOCK, S_IFLNK, S_IFREG, S_IFBLK, S_IFDIR, S_IFCHR, S_IFIFO};
-    char *types = "sl-bdcp";
-    int idx = get_idx_of_arr(flags, sizeof(flags) / sizeof(int), mode);
-    return idx == -1 ? '-' :  types[idx];
+    switch(mode & S_IFMT){
+        case S_IFSOCK:
+            return 's';
+        case S_IFLNK:
+            return 'l';
+        case S_IFREG:
+            return '-';
+        case S_IFBLK:
+            return 'b';
+        case S_IFDIR:
+            return 'd';
+        case S_IFCHR:
+            return 'c';
+        case S_IFIFO:
+            return 'p';
+    }
+    return '-';
 }
 
 static void get_file_perm(mode_t mode, char *perm_str){
-    if(HAS_OPTION(mode, S_IRUSR))
+    if(HAS_BIT(mode, S_IRUSR))
         perm_str[0]='r';
-    if(HAS_OPTION(mode, S_IWUSR))
+    if(HAS_BIT(mode, S_IWUSR))
         perm_str[1]='w';
-    if(HAS_OPTION(mode, S_IXUSR))
+    if(HAS_BIT(mode, S_IXUSR))
         perm_str[2]='x';
-    if(HAS_OPTION(mode, S_ISUID))
+    if(HAS_BIT(mode, S_ISUID))
         perm_str[2]='S';
-    if(HAS_OPTION(mode, S_IXUSR|S_ISUID))
+    if(HAS_BIT(mode, S_IXUSR|S_ISUID))
         perm_str[2]='s';
 
 
-    if(HAS_OPTION(mode, S_IRGRP))
+    if(HAS_BIT(mode, S_IRGRP))
         perm_str[3]='r';
-    if(HAS_OPTION(mode, S_IWGRP))
+    if(HAS_BIT(mode, S_IWGRP))
         perm_str[4]='w';
-    if(HAS_OPTION(mode, S_IXGRP))
+    if(HAS_BIT(mode, S_IXGRP))
         perm_str[5]='x';
-    if(HAS_OPTION(mode, S_ISGID))
+    if(HAS_BIT(mode, S_ISGID))
         perm_str[5]='S';
-    if(HAS_OPTION(mode, S_IXGRP|S_ISGID))
+    if(HAS_BIT(mode, S_IXGRP|S_ISGID))
         perm_str[5]='s';
 
 
-    if(HAS_OPTION(mode, S_ISGID))
+    if(HAS_BIT(mode, S_ISGID))
         perm_str[5]='s';
-    if(HAS_OPTION(mode, S_IROTH))
+    if(HAS_BIT(mode, S_IROTH))
         perm_str[6]='r';
-    if(HAS_OPTION(mode, S_IWOTH))
+    if(HAS_BIT(mode, S_IWOTH))
         perm_str[7]='w';
-    if(HAS_OPTION(mode, S_IXOTH))
+    if(HAS_BIT(mode, S_IXOTH))
         perm_str[8]='x';
-    if(HAS_OPTION(mode, S_ISVTX))
+    if(HAS_BIT(mode, S_ISVTX))
         perm_str[8]='T';
-    if(HAS_OPTION(mode, S_IXOTH|S_ISVTX))
+    if(HAS_BIT(mode, S_IXOTH|S_ISVTX))
         perm_str[8]='t';
 }
 
@@ -349,7 +353,7 @@ FREE:
     free(ls_colors_dup);
 }
 
-static void fill_colors(struct ls_entry *entry, char *ls_colors){
+static void get_file_colors(struct ls_entry *entry, char *ls_colors){
     if(entry->perms[2] == 'x' || entry->perms[5] == 'x' || entry->perms[8] == 'x')
         get_ls_color_item(ls_colors, "ex", entry->color);
     switch(entry->typ){
@@ -384,7 +388,7 @@ static void process_file(const char *name, struct list_head *list, char *ls_colo
     entry->ino = st.st_ino;
     entry->nlink = st.st_nlink;
 
-    entry->typ = get_file_type(st.st_mode & S_IFMT);
+    entry->typ = get_file_type(st.st_mode);
 
     strncpy(entry->perms, "---------", 10);
     get_file_perm(st.st_mode, entry->perms);
@@ -403,7 +407,7 @@ static void process_file(const char *name, struct list_head *list, char *ls_colo
     }
 
     strncpy(entry->color, "0", COLOR_SIZE);
-    fill_colors(entry, ls_colors);
+    get_file_colors(entry, ls_colors);
 
     list_add(&entry->node, list);
     COUNT++;

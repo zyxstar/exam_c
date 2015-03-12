@@ -38,6 +38,7 @@ struct ls_entry{
     nlink_t nlink;
     char user[UNM_SIZE];
     char group[GNM_SIZE];
+    int major_dev;
     off_t size;
     char mtime[TIME_SIZE];
     char filenm[FILENM_SIZE];
@@ -51,6 +52,7 @@ struct ls_entry_max{
     nlink_t nlink;
     int user_len;
     int group_len;
+    int major_dev;
     off_t size;
 };
 
@@ -122,16 +124,23 @@ static void print_ls_entry(const struct ls_entry *entry, int options, struct ls_
     if(!HAS_BIT(options, SHOW_ALL) && entry->filenm[0] == '.') return;
     if(HAS_BIT(options, SHOW_INODE))
         printf("%*ld ", (int)log10(max.ino) + 1, entry->ino);
-
-    if(HAS_BIT(options, SHOW_LONG))
-        printf("%c%s %*d %-*s %-*s %*ld %s ",
+    if(HAS_BIT(options, SHOW_LONG)){
+        printf("%c%s %*d %-*s %-*s ",  //%*ld %s ",
             entry->typ, entry->perms,
             (int)log10(max.nlink) + 1, entry->nlink,
             max.user_len, entry->user,
-            max.group_len, entry->group,
-            (int)log10(max.size) + 1, entry->size,
-            entry->mtime);
-
+            max.group_len, entry->group);
+        if(entry->typ == 'b' || entry->typ == 'c')
+            printf("%d %d, %*ld ",
+                (int)log10(max.major_dev) + 1, entry->major_dev,
+                (int)log10(max.size) > 0 ? (int)log10(max.size) + 1 : 1,
+                entry->size);
+        else
+            printf("%*ld ",
+                (int)log10(max.major_dev) + (int)log10(max.size) + 4,
+                entry->size);
+        printf("%s ",entry->mtime);
+    }
     printf("\033[%sm%s\033[0m ", entry->color, entry->filenm);
 
     if(HAS_BIT(options, SHOW_LONG) && entry->typ == 'l')
@@ -161,6 +170,7 @@ static void show_ls_entries(struct list_head *list, int options){
         if(ls_ent->nlink > max.nlink) max.nlink = ls_ent->nlink;
         if(strlen(ls_ent->user) > max.user_len) max.user_len = strlen(ls_ent->user);
         if(strlen(ls_ent->group) > max.group_len) max.group_len = strlen(ls_ent->group);
+        if((ls_ent->typ == 'b' || ls_ent->typ == 'c') && ls_ent->major_dev > max.major_dev) max.major_dev = ls_ent->major_dev;
         if(ls_ent->size > max.size) max.size = ls_ent->size;
     }
 
@@ -195,7 +205,7 @@ static int trave_dir(char *path, int options, char *ls_colors){
             goto DESTORY_LIST;
     }
 
-    if(!HAS_BIT(st.st_mode, S_IFDIR)){
+    if(!S_ISDIR(st.st_mode)){
         process_file(path, list, ls_colors);
         show_ls_entries(list, options);
         goto DESTORY_LIST;
@@ -397,12 +407,16 @@ static void process_file(const char *name, struct list_head *list, char *ls_colo
     get_file_groupname(st.st_gid, entry->group);
 
     entry->size = st.st_size;
+    if(S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode) ){
+        entry->major_dev = major(st.st_rdev);
+        entry->size = minor(st.st_rdev);
+    }
 
     get_file_time(st.st_mtime, entry->mtime);
     strncpy(entry->filenm, name, FILENM_SIZE);
 
     memset(entry->lnfilenm, '\0', FILENM_SIZE);
-    if(entry->typ == 'l'){
+    if(S_ISLNK(st.st_mode)){
         get_link_filenm(name, entry->lnfilenm);
     }
 

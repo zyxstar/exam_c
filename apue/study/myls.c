@@ -57,14 +57,13 @@ struct ls_entry_max{
 };
 
 static int COUNT = 0;
+static jmp_buf  jmp_trave;
+static jmp_buf  jmp_process;
 
 static void parse_argv(char **argv, char **path, int *options);
 static char *load_ls_colors();
 static int trave_dir(char *path, int options, char *ls_colors);
 static void process_file(const char *name, struct list_head *list, char *ls_colors);
-
-static jmp_buf  jmp_trave;
-static jmp_buf  jmp_process;
 
 int main(int argc, char **argv){
     int options = 0;
@@ -131,13 +130,15 @@ static void print_ls_entry(const struct ls_entry *entry, int options, struct ls_
             max.user_len, entry->user,
             max.group_len, entry->group);
         if(entry->typ == 'b' || entry->typ == 'c')
-            printf("%d %d, %*ld ",
-                (int)log10(max.major_dev) + 1, entry->major_dev,
-                (int)log10(max.size) > 0 ? (int)log10(max.size) + 1 : 1,
+            printf("%*d, %*ld ",
+                max.major_dev > 0 ? (int)log10(max.major_dev) + 1 : 1,
+                entry->major_dev,
+                max.size > 0 ? (int)log10(max.size) + 1 : 1,
                 entry->size);
         else
             printf("%*ld ",
-                (int)log10(max.major_dev) + (int)log10(max.size) + 4,
+                (max.major_dev > 0 ? (int)log10(max.major_dev) + 1 : 1)
+                + (max.size > 0 ? (int)log10(max.size) + 1 : 1) + 2,
                 entry->size);
         printf("%s ",entry->mtime);
     }
@@ -435,3 +436,6 @@ ERROR:
 
 
 // gcc myls.c -o myls -lm
+// longjmp
+//
+

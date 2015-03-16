@@ -56,14 +56,12 @@ struct ls_entry_max{
     off_t size;
 };
 
-static int COUNT = 0;
-static jmp_buf  jmp_trave;
-static jmp_buf  jmp_process;
+static int LS_ENT_COUNT = 0;
 
 static void parse_argv(char **argv, char **path, int *options);
 static char *load_ls_colors();
 static int trave_dir(char *path, int options, char *ls_colors);
-static void process_file(const char *name, struct list_head *list, char *ls_colors);
+static int process_file(const char *name, struct list_head *list, char *ls_colors);
 
 int main(int argc, char **argv){
     int options = 0;
@@ -160,7 +158,7 @@ static void show_ls_entries(struct list_head *list, int options){
     struct list_head *cur;
     struct ls_entry *ls_ent;
 
-    struct ls_entry **sort_list = malloc(sizeof(struct ls_entry *) * COUNT);
+    struct ls_entry **sort_list = malloc(sizeof(struct ls_entry *) * LS_ENT_COUNT);
     int idx = 0;
     struct ls_entry_max max = {0};
     __list_for_each(cur, list) {
@@ -175,8 +173,8 @@ static void show_ls_entries(struct list_head *list, int options){
         if(ls_ent->size > max.size) max.size = ls_ent->size;
     }
 
-    qsort(sort_list, COUNT, sizeof(struct ls_entry *), ls_entry_cmp);
-    for(idx = 0; idx < COUNT; idx++){
+    qsort(sort_list, LS_ENT_COUNT, sizeof(struct ls_entry *), ls_entry_cmp);
+    for(idx = 0; idx < LS_ENT_COUNT; idx++){
         print_ls_entry(sort_list[idx], options, max);
     }
     free(sort_list);
@@ -184,51 +182,48 @@ static void show_ls_entries(struct list_head *list, int options){
 
 
 static int trave_dir(char *path, int options, char *ls_colors){
-    static DIR *dir = NULL;
-    static int ret_cd = 0;
-
+    DIR *dir = NULL;
     struct dirent *entry;
-    struct stat st;
 
-    struct list_head *list = init_list();
+    struct stat st;
+    int retcd = 0;
+    struct list_head *list;
 
     if (stat(path, &st)== -1) {
         perror("stat()");
-        ret_cd = 1;
-        goto END;
+        return -1;
     }
 
-    if (setjmp(jmp_trave) != 0){
-        ret_cd = 1;
-        if (dir != NULL)
-            goto CLOSE_DIR;
-        else
-            goto DESTORY_LIST;
-    }
+    list = init_list();
 
     if(!S_ISDIR(st.st_mode)){
-        process_file(path, list, ls_colors);
-        show_ls_entries(list, options);
-        goto DESTORY_LIST;
+        if(process_file(path, list, ls_colors) == -1){
+            retcd = -1;
+            goto DESTORY_LIST;
+        }
     }
+    else {
+        dir = opendir(path);
+        if (dir == NULL) {
+            perror("opendir()");
+            retcd = -1;
+            goto DESTORY_LIST;
+        }
 
-    dir = opendir(path);
-    if (dir == NULL) {
-        perror("opendir()");
-        ret_cd = 1;
-        goto END;
-    }
+        if(chdir(path) == -1){
+            perror("chdir()");
+            retcd = -1;
+            goto CLOSE_DIR;
+        }
 
-    if(chdir(path) == -1){
-        perror("chdir()");
-        ret_cd = 1;
-        goto CLOSE_DIR;
-    }
-
-    while (1) {
-        entry = readdir(dir);
-        if (entry == NULL) break;
-        process_file(entry->d_name, list, ls_colors);
+        while (1) {
+            entry = readdir(dir);
+            if (entry == NULL) break;
+            if(process_file(entry->d_name, list, ls_colors) == -1){
+                retcd = -1;
+                goto CLOSE_DIR;
+            }
+        }
     }
 
     show_ls_entries(list, options);
@@ -239,8 +234,7 @@ CLOSE_DIR:
 DESTORY_LIST:
     destroy_list(list);
 
-END:
-    return ret_cd;
+    return retcd;
 }
 
 static char get_file_type(mode_t mode){
@@ -306,8 +300,8 @@ static void get_file_perm(mode_t mode, char *perm_str){
 static void get_file_username(uid_t uid, char *unm_str){
     struct passwd *pwd = getpwuid(uid);
     if(pwd == NULL){
-        perror("getpwuid()");
-        longjmp(jmp_process, 1);
+        snprintf(unm_str, UNM_SIZE, "%d", uid);
+        return;
     }
     strncpy(unm_str, pwd->pw_name, UNM_SIZE);
 }
@@ -315,8 +309,8 @@ static void get_file_username(uid_t uid, char *unm_str){
 static void get_file_groupname(gid_t gid, char *gnm_str){
     struct group *grp = getgrgid(gid);
     if(grp == NULL){
-        perror("getgrgid()");
-        longjmp(jmp_process, 2);
+        snprintf(gnm_str, GNM_SIZE, "%d", gid);
+        return;
     }
     strncpy(gnm_str, grp->gr_name, GNM_SIZE);
 }
@@ -333,14 +327,16 @@ static void get_file_time(time_t mtime, char *time_str){
         strftime(time_str, TIME_SIZE, "%b %d  %Y", ltm);
 }
 
-static void get_link_filenm(const char *name, char *lnfilenm){
+static int get_link_filenm(const char *name, char *lnfilenm){
     ssize_t size = readlink(name, lnfilenm, FILENM_SIZE);
     if(size == -1){
-        perror("readlink()");
-        longjmp(jmp_process, 3);
+        snprintf(lnfilenm, FILENM_SIZE, "%s readlink()", name);
+        perror(lnfilenm);
+        return -1;
     }
     if(size == FILENM_SIZE) lnfilenm[FILENM_SIZE - 1] = '\0';
     else lnfilenm[size] = '\0';
+    return 0;
 }
 
 static void get_ls_color_item(char *ls_colors, char *nm, char *color){
@@ -382,14 +378,10 @@ static void get_file_colors(struct ls_entry *entry, char *ls_colors){
 
 }
 
-static void process_file(const char *name, struct list_head *list, char *ls_colors){
+static int process_file(const char *name, struct list_head *list, char *ls_colors){
     struct ls_entry *entry = malloc(sizeof(*entry));
     assert(entry != NULL);
     struct stat st;
-
-    if (setjmp(jmp_process) != 0){
-        goto ERROR;
-    }
 
     if (lstat(name, &st) == -1) {
         perror("stat()");
@@ -418,20 +410,21 @@ static void process_file(const char *name, struct list_head *list, char *ls_colo
 
     memset(entry->lnfilenm, '\0', FILENM_SIZE);
     if(S_ISLNK(st.st_mode)){
-        get_link_filenm(name, entry->lnfilenm);
+        if(get_link_filenm(name, entry->lnfilenm) == -1){
+            goto ERROR;
+        }
     }
 
     strncpy(entry->color, "0", COLOR_SIZE);
     get_file_colors(entry, ls_colors);
 
     list_add(&entry->node, list);
-    COUNT++;
-    return;
+    LS_ENT_COUNT++;
+    return 0;
 
 ERROR:
     free(entry);
-    longjmp(jmp_trave, 1);
-
+    return -1;
 }
 
 

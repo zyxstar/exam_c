@@ -63,6 +63,7 @@ static void _timer_wrap_callee_fn(int sig){
 void timer_start(SIMPER_TIMER *timer){
     if(!GLOBAL_TIMER_QUEUE.is_start){
         act.sa_handler = _timer_wrap_callee_fn;
+        act.sa_flags |= SA_RESTART;
         sigaction(SIGALRM, &act, &oldact);
 
         tv.it_value.tv_sec = 0;

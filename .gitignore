@@ -1,8 +1,5 @@
 *.i
-<<<<<<< HEAD
 
-=======
->>>>>>> 9eb5152a2fa2ba12f271a0ec3940d2e60e01e0ef
 *.out
 *.result
 *.log
@@ -10,3 +7,15 @@
 *.DS_Store
 
 /exam
+/tetris/ctrl.o
+/tetris/game.o
+/tetris/simple_timer.o
+/tetris/tetris_double.o
+/tetris/tetris_single.o
+/tetris/tetris_single2.o
+/tetris/utils.o
+/tetris/view.o
+/tetris/tetris_double
+/tetris/tetris_single
+/tetris/tetris_single2
+/tetris/console.o

@@ -13,14 +13,17 @@ int main(){
     sigemptyset(&act.sa_mask);
     sigaddset(&act.sa_mask, SIGALRM);
     act.sa_flags = SA_RESTART;
-    sigaction(SIGALRM, &act, NULL);
+    //sigaction(SIGALRM, &act, NULL);
 
-    alarm(3);
+    int a = alarm(30);
+    int b = alarm(20);
+    int c = alarm(40);
+    printf("%d %d %d %d\n", a, b, c, alarm(0));
 
-    while(1){
+    // while(1){
         pause();
-        printf("after pause\n");
-    }
+    //     printf("after pause\n");
+    // }
 
     return 0;
 }

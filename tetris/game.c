@@ -345,7 +345,7 @@ BOOL game_move_down(GAME *game){
 
     sigset_t set, oset;
     sigemptyset(&set);
-    sigaddset(&set, SIGALARM);
+    sigaddset(&set, SIGALRM);
 
     sigprocmask(SIG_BLOCK, &set, &oset);
 

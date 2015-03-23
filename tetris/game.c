@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <signal.h>
 #include <math.h>
 #include "game.h"
 
@@ -342,6 +343,12 @@ BOOL game_move_down(GAME *game){
     if(game->is_over || game->is_pause) return FALSE;
     DEBUG_WRITE(("game_move_down begin\n"));
 
+    sigset_t set, oset;
+    sigemptyset(&set);
+    sigaddset(&set, SIGALARM);
+
+    sigprocmask(SIG_BLOCK, &set, &oset);
+
     // pthread_mutex_lock(&game->mutex);
     POS down = {0, 1};
     BOOL is_moved = _move(game, down);
@@ -358,6 +365,8 @@ BOOL game_move_down(GAME *game){
         game->cur_block.down_count++;
     }
     // pthread_mutex_unlock(&game->mutex);
+    sigprocmask(SIG_SETMASK, &oset, NULL);
+
     DEBUG_WRITE(("game_move_down end: [is_moved]%s\n", human_bool(is_moved)));
     return is_moved;
 }

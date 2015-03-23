@@ -21,17 +21,21 @@ int main(void)
 	printf("%s %p\n", __func__, (void *)pthread_self());
 
 	int i;
-	void (*save)(int);
+	struct sigaction act, save;
 
-	save = signal(SIGINT, handler);
-	signal(SIGQUIT, handler);
+	//save = signal(SIGINT, handler);
+	act.sa_handler = handler;
+	sigemptyset(&act.sa_mask);
+	sigaddset(&act.sa_mask, SIGINT);
+	sigaddset(&act.sa_mask, SIGQUIT);
+	act.sa_flags = SA_RESTART;
+	sigaction(SIGINT, &act, &save);
 
-	// for (i = 0; ; i++) {
-	// 	if (i == 10) {
-	// 		signal(SIGINT, save);
-	// 	}
+	sigaction(SIGQUIT, &act, NULL);
+
+	while (1) {
 		pause();
-	// }
+	}
 
 	return 0;
 }

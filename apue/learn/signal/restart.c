@@ -19,10 +19,9 @@ int main(void)
 	sigemptyset(&act.sa_mask);
 	sigaddset(&act.sa_mask, SIGINT);
 	sigaddset(&act.sa_mask, SIGQUIT);
-	act.sa_flags = SA_RESTART;
-	//act.sa_flags = 0;
+	//act.sa_flags = SA_RESTART;
+	act.sa_flags = 0;
 	sigaction(SIGINT, &act, NULL);
-	//sigaction(SIGQUIT, &act, NULL);
 
 	while (1) {
 		ret = read(0, buf, BUFSIZE);

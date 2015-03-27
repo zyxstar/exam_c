@@ -5,6 +5,7 @@
 *.log
 *.swp
 *.DS_Store
+*.bak
 
 /exam
 /tetris/ctrl.o

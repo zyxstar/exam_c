@@ -10,19 +10,22 @@ struct AgentInfo{
 };
 
 
-sem_t sem_s;
-sem_t sem_m;
+static sem_t sem;
 
-
-void *sell_tickets(void *arg){
+static void *sell_tickets(void *arg){
     struct AgentInfo *st_info = arg;
     while(1){
-        sem_wait(&sem_s);
+        sem_wait(&sem);
         if(*st_info->num_tickets_p == 0){
+            sem_post(&sem);
             break;
         }
         printf("Agent %d sells a ticket %d\n", st_info->agent_id, *st_info->num_tickets_p);
-        sem_post(&sem_m);    
+        (*st_info->num_tickets_p)--;
+        sem_post(&sem);
+
+        if((rand() % 100) > 90)
+            sleep(1);
     }
     printf("Agent %d done!\n", st_info->agent_id);
     free(st_info);
@@ -40,9 +43,7 @@ int main(){
     pthread_t tid[numAgents];
 
     srand(time(NULL));
-    sem_init(&sem_s, 0, 0);
-    sem_init(&sem_m, 0, 0);
-
+    sem_init(&sem, 0, 1);
 
     for(i = 0; i < numAgents; i++){
         st_info = malloc(sizeof(struct AgentInfo));
@@ -51,22 +52,11 @@ int main(){
         pthread_create(tid + i, NULL, sell_tickets, (void *)st_info);
     }
 
-    while(1){
-        if(numTickets == 0)
-            break;
-        sem_post(&sem_s);
-        numTickets--;
-        sem_wait(&sem_m);
-        // if((rand() % 100) > 90)
-        //     sleep(1);
-    }
-
     for(i = 0; i < numAgents; i++) {
         pthread_join(tid[i], NULL);
     }
 
-    sem_destroy(&sem_s);
-    sem_destroy(&sem_m);
+    sem_destroy(&sem);
 
     return 0;
 }

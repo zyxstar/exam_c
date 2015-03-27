@@ -2,93 +2,51 @@
 #include <stdlib.h>
 #include <semaphore.h>
 
-#define NAMESIZE 32
+#define BUFSIZE 8
 
+static char buffer[BUFSIZE];
+static sem_t empty_buffers;
+static sem_t full_buffers;
 
-char buffer[8];
-Semaphore emptyBuffers = SemaphoreNew(-,8);
-Semaphore fullBuffers = SemaphoreNew(-,0);
- 
-void Writer(){
-    for(int i=0; i<40; i++){
-        char c = PrepareRandomChar();
-        SemaphoreWait(emptyBuffers);
-        buffer[i%8] = c;
-        SemaphoreSignal(fullBuffers);
+static void *writer(void *unuse){
+    int i;
+    for(i=0; i<40; i++){
+        char c = rand()%26 + 'A';
+        sem_wait(&empty_buffers);
+        buffer[i%BUFSIZE] = c;
+        sem_post(&full_buffers);
     }
-}
- 
-void Reader(){
-    for(int i=0; i<40; i++){
-        SemaphoreWait(fullBuffers);
-        char c = buffer[i%8];
-        SemaphoreSignal(emptyBuffers);
-        ProcessChar(c);
-    }
-}
- 
-int main(){
-    InitThreadPackage(false);
-    ThreadNew("Writer", Writer, 0);
-    ThreadNew("Reader", Reader, 0);
-    RunAllThreads();
-　　return 0;
+    return NULL;
 }
 
-
-struct AgentInfo{
-    int agent_id;
-    int *num_tickets_p;
-};
-
-
-sem_t bin_sem;
-
-void *sell_tickets(void *arg){
-    struct AgentInfo *st_info = arg;
-    while(1){
-        sem_wait(&bin_sem);
-        if(*st_info->num_tickets_p == 0){
-            sem_post(&bin_sem);
-            break;
-        }
-        printf("Agent %d sells a ticket %d\n", st_info->agent_id, *st_info->num_tickets_p);
-        (*st_info->num_tickets_p)--;
-        sem_post(&bin_sem);
-
-        if((rand() % 100) > 50)
-            sleep(1);
+static void *reader(void *unuse){
+    int i;
+    for(i=0; i<40; i++){
+        sem_wait(&full_buffers);
+        char c = buffer[i%BUFSIZE];
+        sem_post(&empty_buffers);
+        putchar(c);
     }
-    printf("Agent %d done!\n", st_info->agent_id);
-    free(st_info);
     return NULL;
 }
 
 
-
 int main(){
-    int numAgents = 10;
-    int numTickets = 150;
-    int i;
-    struct AgentInfo *st_info;
-
-    pthread_t tid[numAgents];
+    pthread_t tid[2];
 
     srand(time(NULL));
-    sem_init(&bin_sem, 0, 0);
+    sem_init(&empty_buffers, 0, BUFSIZE);
+    sem_init(&full_buffers, 0, 0);
 
-    for(i = 0; i < numAgents; i++){
-        st_info = malloc(sizeof(struct AgentInfo));
-        st_info->agent_id = i;
-        st_info->num_tickets_p = &numTickets;
-        pthread_create(tid + i, NULL, sell_tickets, (void *)st_info);
-    }
-    sem_post(&bin_sem);
+    pthread_create(tid, NULL, writer, NULL);
+    pthread_create(tid + 1, NULL, reader, NULL);
 
+    pthread_join(tid[0], NULL);
+    pthread_join(tid[1], NULL);
 
-    for(i = 0; i < numAgents; i++) {
-        pthread_join(tid[i], NULL);
-    }
+    sem_destroy(&empty_buffers);
+    sem_destroy(&full_buffers);
 
+    printf("\n");
     return 0;
 }

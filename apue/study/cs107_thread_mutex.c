@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-// #include <semaphore.h>
-
 #define NAMESIZE 32
 
 struct AgentInfo{
@@ -14,8 +12,7 @@ struct AgentInfo{
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-
-void *sell_tickets(void *arg){
+static void *sell_tickets(void *arg){
     struct AgentInfo *st_info = arg;
     while(1){
         pthread_mutex_lock(&mutex);
@@ -27,7 +24,7 @@ void *sell_tickets(void *arg){
         (*st_info->num_tickets_p)--;
         pthread_mutex_unlock(&mutex);
 
-        if((rand() % 100) > 50)
+        if((rand() % 100) > 90)
             sleep(1);
     }
     printf("Agent %d done!\n", st_info->agent_id);

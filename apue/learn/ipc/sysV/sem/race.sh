@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo 1 > tmp
-gcc race_lock.c
+gcc race.c
 ./a.out
 cat tmp

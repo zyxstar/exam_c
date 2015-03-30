@@ -33,9 +33,9 @@ static void *jobs(void *unuse)
 	while (1) {
 		//pthread_mutex_lock(&mutex);
 
-		while (data == 0) {
-        	sem_wait(&sem_j);
-		}
+		//while (data == 0) {
+        sem_wait(&sem_j);
+		//}
 
 		if (data == -1) {
 			//pthread_mutex_unlock(&mutex);
@@ -64,7 +64,7 @@ int main(void)
 	int i;
 
     sem_init(&sem_j, 0, 0);
-    sem_init(&sem_m, 0, 0);
+    sem_init(&sem_m, 0, 1);
 
 	for (i = 0; i < THREAD_NUM; i++) {
 		pthread_create(tid + i, NULL, jobs, NULL);
@@ -72,18 +72,18 @@ int main(void)
 
 	for (i = START; i <= END; i++) {
 		//pthread_mutex_lock(&mutex);
-		while (data != 0) {
-			sem_wait(&sem_m);
-		}
+		//while (data != 0) {
+		sem_wait(&sem_m);
+		//}
 		data = i;
 		//pthread_mutex_unlock(&mutex);
 		sem_post(&sem_j);
 	}
 
 	//pthread_mutex_lock(&mutex);
-	while (data != 0) {
-		sem_wait(&sem_m);
-	}
+	//while (data != 0) {
+	sem_wait(&sem_m);
+	//}
 	data = -1;
 	//pthread_mutex_unlock(&mutex);
 	for (i = 0; i < THREAD_NUM; i++)//没有broadcast，只能根据线程数目进行post
@@ -103,8 +103,3 @@ int main(void)
 }
 
 
-/**
- * semaphore 也有惊群现场
- * 但可以不使用mutex
- *
- */

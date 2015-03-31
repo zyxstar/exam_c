@@ -86,6 +86,8 @@ int main(void)
 	//}
 	data = -1;
 	//pthread_mutex_unlock(&mutex);
+
+	//更好的方案，应该是每个子线程有一个sem，而不是共用一个
 	for (i = 0; i < THREAD_NUM; i++)//没有broadcast，只能根据线程数目进行post
 		sem_post(&sem_j);
 

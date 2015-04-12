@@ -38,9 +38,7 @@ int main(void)
 		fgets(buf, BUFSIZE, stdin);
 		/* if error */
 		sscanf(buf, "%ld:%s", &msgbuf.type, msgbuf.text);
-		msgbuf.text[strlen(msgbuf.text) + 1] = '\0';
-		msgbuf.text[strlen(msgbuf.text) - 1] = '\n';
-		printf("will send, type: %ld, text: %s", msgbuf.type, msgbuf.text);
+		printf("will send, type: %ld, text: %s\n", msgbuf.type, msgbuf.text);
 
 		ret = msgsnd(msgid, &msgbuf, strlen(msgbuf.text), 0);
 		/* if error */

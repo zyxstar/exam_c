@@ -1,0 +1,25 @@
+                cmd              content
+            major minor
+login       1     1              id(uint32t)
+                  2              salt(string)
+                  3              encrypt(string)
+                  4              ACK(uint8t)(0 success)
+                  50(logout)     id(uint32t)
+
+message     2     1              dest(uint32t) src(uint32t) msg(string)
+
+list        3     1(request)     id(uint32t)
+                  2(list)        list(uint32t[])
+
+heart       10    1              id(uint32t)
+
+manage      100
+
+error       200
+
+
+
+
+
+
+

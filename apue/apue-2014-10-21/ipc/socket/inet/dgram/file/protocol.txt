@@ -1,0 +1,18 @@
+         cmd                    data
+      major(1b) minor(1b)
+登录   1        1(用户名)       name(string)
+                2(salt)         salt(string)
+                3(encrypt)      encrypt(string)
+                10(ACK)         ACK(1b)(0 success, 1 fail)
+                100(logout)
+
+下载   2        1(path)         path(string)
+                2(request fail)
+                3(data)         ind(4b) data
+                4(data ACK)     ind(4b)
+
+列表   4        1(request)
+                2(request fail)
+                3(data)	        data
+
+错误   50

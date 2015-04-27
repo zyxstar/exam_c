@@ -1,0 +1,33 @@
+1、计算100天以后的日期
+2、timelog
+
+
+time_t stamp;
+
+stamp = time(NULL);
+time(&stamp);
+
+
+struct tm *tm;
+tm = localtime(&stamp);
+
+mktime();
+
+char buf[128];
+strftime(buf,128,"%Y-%m-%d",tm)
+puts(buf);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

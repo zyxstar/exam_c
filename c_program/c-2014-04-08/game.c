@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main(void)
+{
+	int i, j;
+
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 10; j++) {
+			if (j == i) {
+				continue;
+			}
+			if (i + j == 13) {
+				printf("%d + %d = 13\n", i, j);
+			}
+		}
+	}
+
+	return 0;
+}

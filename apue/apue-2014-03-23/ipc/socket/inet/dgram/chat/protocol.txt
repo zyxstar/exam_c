@@ -1,0 +1,14 @@
+             cmd                       data
+        major(1B)  minor(1B)
+
+login   1          1(c2s)        id(4B)
+                   2(s2c)        salt(string)
+                   3(c2s)        encrypt(string)
+                   4(s2c, ok)    int(1B, 0 success, positive fail)
+
+message 2          1             dest_id(4B), src_id(4B), message(string)
+
+update  3          1(c2s)        id(4B)
+
+error   200        1(general)
+                   2()

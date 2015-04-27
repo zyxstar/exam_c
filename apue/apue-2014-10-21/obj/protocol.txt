@@ -1,0 +1,21 @@
+             major(1b) minor(1b)       data
+login        1         1(name)         name(str)
+                       2(salt)         salt(str)
+                       3(encrypt)      encrypt(str)
+                       4(ACK)          ACK(1b)(1 success/2 fail)
+                       200(logout)
+
+message      2         1               dest(4b) src(4b) msg(str)
+
+list         3         1(request)      src(4b)
+                       2(list)         list(uint32[])
+
+update       4         1(update)       src(4b)
+
+manage       100       1(id insert)
+                       2(insert ACK)   newid(4b)
+                       20(id delete)   id(4b)
+                       30(id search)   id(4b)
+                       31(search ACK)  version(1b) 
+
+error        200       1(undefine)

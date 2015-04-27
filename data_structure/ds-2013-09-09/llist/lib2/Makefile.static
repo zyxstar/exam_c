@@ -1,0 +1,20 @@
+LDFLAGS := -lllist
+
+all: main
+
+main: main.c
+	gcc -o $@ $< $(LDFLAGS)
+
+lib%.a: %.o
+	ar -cr $@ $<
+	ranlib $@
+
+%.o: %.c %.h
+	gcc -c -o $@ $<
+
+install: libllist.a
+	cp llist.h /usr/local/include
+	mv libllist.a /usr/local/lib
+
+clean:
+	rm -f *~ *.o *.a main

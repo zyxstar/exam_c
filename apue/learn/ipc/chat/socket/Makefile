@@ -7,7 +7,7 @@ OBJ := server client
 
 all: $(OBJ)
 
-server: server.o
+server: server.o llist.o database.o
 	gcc -o $@ $^ $(LDFLAGS)
 
 client: client.o

@@ -3,15 +3,20 @@
 
 #include <arpa/inet.h>
 
-#define PACKET_SIZE     1480
-#define PADSIZE         (PACKET_SIZE - 2)
-#define MSGSIZE         (PADSIZE - sizeof(uint32_t) * 2)
-#define LISTNUM         (PADSIZE / sizeof(uint32_t))
+#define PACKET_SIZE        1480
+#define PADSIZE            (PACKET_SIZE - 2)
+#define MSGSIZE            (PADSIZE - sizeof(uint32_t) * 2)
+#define LISTNUM            (PADSIZE / sizeof(uint32_t))
+#define msg2pktsize(A)     ((A) + 10)
+
+//#define HEART_INTERVAL     10
+#define HEART_INTERVAL     2
+#define OFFLINE_INTERVAL   (HEART_INTERVAL * 3)
 
 struct __attribute__ ((__packed__)) msg_st {
 	uint32_t dest;
 	uint32_t src;
-	uint8_t message[0];
+	int8_t message[0];
 };
 
 struct __attribute__ ((__packed__)) packet_st {
@@ -19,8 +24,8 @@ struct __attribute__ ((__packed__)) packet_st {
 	uint8_t minor;
 	union {
 		uint32_t id;
-		uint8_t salt[0];
-		uint8_t encrypt[0];
+		int8_t salt[0];
+		int8_t encrypt[0];
 		uint8_t ack;
 		struct msg_st msg;
 		uint32_t list[0];

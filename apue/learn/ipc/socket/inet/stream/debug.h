@@ -19,11 +19,11 @@
 #define debug2(...)
 #endif
 
-#ifdef DEBUG
-#ifndef DEBUG1
-#define DEBUG1
-#endif
-#endif
+// #ifdef DEBUG
+// #ifndef DEBUG1
+// #define DEBUG1
+// #endif
+// #endif
 
 #ifdef DEBUG1
 #ifndef DEBUG
@@ -38,6 +38,10 @@
 #define debug(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define debug(...)
+#endif
+
+#if 0
+#define debug(fmt, args...)  fprintf(stderr, fmt, ##args)
 #endif
 
 #endif	/* HS_DEBUG_H */

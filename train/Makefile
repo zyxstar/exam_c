@@ -1,31 +1,23 @@
-COMPILER = gcc
-IDIR = ../utils
-CXXFLAGS += -I$(IDIR)
-OBJECTS = user.o train.o menu.o list.o console.o
+CC       :=  gcc
+INCLUDE  :=  -I. -I../utils
 
-app: $(OBJECTS) app.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) app.o -o app
+vpath %.c ../utils
 
-app.o: app.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+OBJS = user.o train.o menu.o list.o console.o
 
-train.o: train.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+app:%: $(OBJS) %.o
+	$(CC) -o $@ $^ $(INCLUDE) $(LDFLAGS)
 
-user.o: user.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
-menu.o: $(IDIR)/menu.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+%o:%c
+	$(CC) $(INCLUDE) $(CFLAGS) -c -o $@ $<
 
-list.o: $(IDIR)/list.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
-
-console.o: $(IDIR)/console.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
 clean:
-	rm $(OBJECTS) app.o app
+	-rm -f *~ *.o *.log app
 
+debug: CFLAGS += -DDEBUG
+debug: app
 
+#make -e CFLAGS+=-DDEBUG
 

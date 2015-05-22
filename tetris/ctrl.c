@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <simple_timer.h>
-#include "view.h"
-#include "ctrl.h"
+#include <view.h>
+#include <ctrl.h>
+
 
 
 static void _draw_level_fn(GAME_UI *ui){

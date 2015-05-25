@@ -6,7 +6,7 @@ BEGIN		{
 			ready = 1
 			next
 		}
-/^{/		{
+/a^{/		{
 			next
 		}
 /^}/		{

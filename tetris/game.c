@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <math.h>
-#include "game.h"
+#include <game.h>
 
 PANEL _init_panel(){
     DEBUG_WRITE(("_init_panel begin\n"));

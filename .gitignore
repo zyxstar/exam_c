@@ -7,6 +7,7 @@
 *.DS_Store
 *.bak
 
+*.o
 /exam
 /tetris/ctrl.o
 /tetris/game.o

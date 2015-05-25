@@ -1,48 +1,29 @@
-COMPILER = gcc
-IDIR = ../utils
-CXXFLAGS += -I$(IDIR)
-OBJECTS = ctrl.o view.o game.o console.o simple_timer.o
+CC       :=  gcc
+LDFLAGS  :=  -lm
+INCLUDE  :=  -I. -I../utils
 
-tetris_single: $(OBJECTS) tetris_single.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_single.o -lm -o tetris_single
+vpath %.c ../utils
 
-tetris_single2: $(OBJECTS) tetris_single2.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_single2.o -lm -o tetris_single2
+OBJS  =  ctrl.o view.o game.o console.o simple_timer.o
+ALL   =  tetris_single tetris_single2 tetris_double
 
-tetris_double: $(OBJECTS) tetris_double.o
-	$(COMPILER) $(CXXFLAGS) $(OBJECTS) tetris_double.o -lm -o tetris_double
+.PHONY: all debug clean
 
-tetris_single.o: tetris_single.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+all: $(ALL)
 
-tetris_single2.o: tetris_single2.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+$(ALL):%: $(OBJS) %.o
+	@echo "\033[31m$@ is being linked ......\033[0m"
+	$(CC) -o $@ $^ $(INCLUDE) $(LDFLAGS)
 
-tetris_double.o: tetris_double.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+%.o: %.c
+	@echo "\033[31m$@ is compiling ......\033[0m"
+	$(CC) $(INCLUDE) $(CFLAGS) -c -o $@ $<
 
-ctrl.o: ctrl.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
 
-view.o: view.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
-
-game.o: game.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
-
-console.o: $(IDIR)/console.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
-
-simple_timer.o: $(IDIR)/simple_timer.c
-	$(COMPILER) -c $(CXXFLAGS) $^ -o $@
+debug: CFLAGS += -DDEBUG
+debug: all
 
 clean:
-	rm $(OBJECTS) tetris_single.o tetris_single
-
-clean_single2:
-	rm $(OBJECTS) tetris_single2.o tetris_single2
-
-clean_double:
-	rm $(OBJECTS) tetris_double.o tetris_double
+	-rm -f *~ $(ALL) *.o *.log
 
 

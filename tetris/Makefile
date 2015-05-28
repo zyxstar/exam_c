@@ -1,29 +1,42 @@
 CC       :=  gcc
-LDFLAGS  :=  -lm
-INCLUDE  :=  -I. -I../utils
+LDFLAGS  +=  -lm
+CFLAGS   +=  -I. -I../utils
+VPATH    += ../utils
 
-vpath %.c ../utils
+# vpath %.c ../utils
+# vpath %.h ../utils
 
-OBJS  =  ctrl.o view.o game.o console.o simple_timer.o
-ALL   =  tetris_single tetris_single2 tetris_double
+objs  :=  ctrl.o view.o game.o console.o simple_timer.o
+all   :=  tetris_single tetris_single2 tetris_double
 
-.PHONY: all debug clean
 
-all: $(ALL)
+all: $(all)
 
-$(ALL):%: $(OBJS) %.o
+$(all):%: $(objs) %.o
 	@echo "\033[31m$@ is being linked ......\033[0m"
-	$(CC) -o $@ $^ $(INCLUDE) $(LDFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
-%.o: %.c
+# will be automatically derived if not use %.h
+# dependency header files
+%.o: %.c %.h
 	@echo "\033[31m$@ is compiling ......\033[0m"
-	$(CC) $(INCLUDE) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 
 debug: CFLAGS += -DDEBUG
 debug: all
 
 clean:
-	-rm -f *~ $(ALL) *.o *.log
+	-rm -f *~ $(all) *.o *.log
 
 
+push: clean
+	cd ..
+	git add *
+	git commit -a
+	git push origin master:master
+	git push gitcafe master:master
+
+
+.PHONY: all debug clean push
+.ONESHELL: push

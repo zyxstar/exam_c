@@ -1,10 +1,10 @@
 
 #include "game.h"
 
-#define FRM_TOP (1)
-#define FRM_WID (22)
-#define FRM_EX_WID (12)
-#define FRM_HEI (22)
+#define FRM_TOP     (1)
+#define FRM_WID     (22)
+#define FRM_EX_WID  (12)
+#define FRM_HEI     (22)
 
 void clear_tty();
 void reset_tty();

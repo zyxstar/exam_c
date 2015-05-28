@@ -1,17 +1,12 @@
 CC       :=  gcc
-INCLUDE  :=  -I. -I../utils
+CFLAGS   +=  -I. -I../utils
 
 vpath %.c ../utils
 
 OBJS = user.o train.o menu.o list.o console.o
 
 app:%: $(OBJS) %.o
-	$(CC) -o $@ $^ $(INCLUDE) $(LDFLAGS)
-
-
-%o:%c
-	$(CC) $(INCLUDE) $(CFLAGS) -c -o $@ $<
-
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:
 	-rm -f *~ *.o *.log app

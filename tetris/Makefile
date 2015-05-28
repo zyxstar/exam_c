@@ -30,13 +30,5 @@ clean:
 	-rm -f *~ $(all) *.o *.log
 
 
-push: clean
-	cd ..
-	git add *
-	git commit -a
-	git push origin master:master
-	git push gitcafe master:master
-
-
 .PHONY: all debug clean push
-.ONESHELL: push
+

@@ -1,0 +1,17 @@
+500000d4 r __FUNCTION__.1271
+500000c4 r __FUNCTION__.1276
+500080e4 A __bss_end__
+500080e4 A __bss_start
+500080e4 A __bss_start__
+500080e4 A __end__
+500000e4 A __exidx_end
+500000e4 A __exidx_start
+500080e4 A _bss_end__
+500080e4 A _edata
+500080e4 A _end
+50000000 T _start
+5000004c T hardware_init
+50000074 T hardware_ops
+50000010 T main
+5000009c T read_chip
+50000004 t reset

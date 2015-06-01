@@ -1,0 +1,13 @@
+5000813c A __bss_end__
+5000813c A __bss_start
+5000813c A __bss_start__
+5000813c A __end__
+5000013c A __exidx_end
+5000013c A __exidx_start
+5000813c A _bss_end__
+5000813c A _edata
+5000813c A _end
+50000000 T _start
+50000028 T clock_for_uart
+50000010 T main
+50000004 t reset

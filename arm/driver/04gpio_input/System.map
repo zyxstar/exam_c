@@ -1,0 +1,14 @@
+50008138 A __bss_end__
+50008138 A __bss_start
+50008138 A __bss_start__
+50008138 A __end__
+50000138 A __exidx_end
+50000138 A __exidx_start
+50008138 A _bss_end__
+50008138 A _edata
+50008138 A _end
+50000000 T _start
+50000058 T button_init
+50000088 T button_state
+50000010 T main
+50000004 t reset

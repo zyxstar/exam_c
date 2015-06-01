@@ -1,0 +1,44 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AS	Makefile	/^AS		:=$(CROSS_COMPILE)as$/;"	m
+BIN	Makefile	/^BIN		:=$(TARGET).bin$/;"	m
+CC	Makefile	/^CC		:=$(CROSS_COMPILE)gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS		:=-I.\/include -Wall$/;"	m
+CROSS_COMPILE	Makefile	/^CROSS_COMPILE 	:=arm-linux-$/;"	m
+GPM4CON	include/led.h	8;"	d
+GPM4DAT	include/led.h	9;"	d
+LD	Makefile	/^LD		:=$(CROSS_COMPILE)ld$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS		:=$/;"	m
+LD_ADDR	Makefile	/^LD_ADDR		:=0x50000000$/;"	m
+LD_LDS	Makefile	/^LD_LDS		:=.\/ld.lds$/;"	m
+NM	Makefile	/^NM		:=$(CROSS_COMPILE)nm$/;"	m
+NULL	include/common.h	7;"	d
+OBJCOPY	Makefile	/^OBJCOPY		:=$(CROSS_COMPILE)objcopy$/;"	m
+OBJDUMP	Makefile	/^OBJDUMP		:=$(CROSS_COMPILE)objdump$/;"	m
+OBJS	Makefile	/^OBJS		:=button.o$/;"	m
+PRO_ID	include/chip_id.h	6;"	d
+RM	Makefile	/^RM		:=rm -rf	$/;"	m
+START	Makefile	/^START		:=start.o main.o$/;"	m
+TARGET	Makefile	/^TARGET		:=arm$/;"	m
+__BUTTON_H__	include/button.h	2;"	d
+__CHIP_ID_H__	include/chip_id.h	2;"	d
+__COMMON_H__	include/common.h	2;"	d
+__HD_H__	include/hardware.h	2;"	d
+__LED_H__	include/led.h	2;"	d
+_start	start.s	/^_start:$/;"	l
+button_init	button.c	/^void button_init(void)$/;"	f
+button_state	button.c	/^int button_state(void)$/;"	f
+hardware_init	hardware.c	/^void hardware_init(void)$/;"	f
+hardware_ops	hardware.c	/^void hardware_ops(void)$/;"	f
+led_init	led.c	/^void led_init(void)$/;"	f
+led_off	led.c	/^void led_off(int no)$/;"	f
+led_on	led.c	/^void led_on(int no)$/;"	f
+main	main.c	/^int main(void)$/;"	f
+printf	include/common.h	6;"	d
+read_chip	chip_id.c	/^int read_chip(void)$/;"	f
+reset	start.s	/^reset:$/;"	l
+udelay	include/common.h	4;"	d

@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #include <getopt.h>
+#include <arpa/inet.h>
 
 #include <proto.h>
 #include <site_types.h>
@@ -52,10 +53,14 @@ int main(){
     }
 
     listbuf->id = LISTCHNID;
-    for(i = 0, tmp = listbuf->entry; i < 3; i++, tmp = (void *)((char *)tmp) + 9){
+    tmp = listbuf->entry;
+    for(i = 0; i < 3; i++ ){
+        // printf("%p\n", tmp);
         tmp->id = id[i];
         tmp->len = htons(9);
-        strncpy(tmp->descr, descr[0], 6);
+        strncpy((char *)tmp->descr, descr[i], 6);
+        // printf("%s\n", tmp->descr);
+        tmp = (void *)(((char *)tmp) + 9);
     }
 
     raddr.sin_family = AF_INET;

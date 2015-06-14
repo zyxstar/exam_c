@@ -10,16 +10,17 @@
 #define LISTCHNID        0
 #define CHNNR            200
 #define MINCHNID         1
-#define MAXCHNID         (MINCHNID+CHNNR-1)
+#define MAXCHNID         (MINCHNID + CHNNR - 1)
 
-#define MSG_CHANNEL_MAX  (65536-20-8)
+#define MSG_CHANNEL_MAX  (65536 - 20 - 8)
+// #define MSG_CHANNEL_MAX  (512 - 20 - 8)
 struct msg_channel_st{
     chnid_t id;  /* must between [MINCHNID,MAXCHNID] */
     uint8_t data[1];
 } __attribute__((packed));
 
 
-#define MSG_LIST_MAX  (65536-20-8)/*IP包大小-IP头-UDP头*/
+#define MSG_LIST_MAX     (65536 - 20 - 8)/*IP包大小-IP头-UDP头*/
 struct msg_listentry_st{
     chnid_t id;
     uint16_t len;

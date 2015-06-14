@@ -1,10 +1,16 @@
-CC     :=  gcc
-CFLAGS +=  -I. -I../include
+CC     := gcc
+CFLAGS += -Wall -I. -I../include
+VPATH  += ../include
 
-all: client
+headers = proto.h site_types.h client_conf.h
 
-client: main.o
-	$(CC) $(LDFLAGS) -o $@ $^
+all: client testserver
+
+client: main.o $(headers)
+	$(CC) -o $@ $< $(CFLAGS) $(LDFLAGS)
+
+testserver:%: %.c $(headers)
+	$(CC) -o $@ $< $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf main.o client testserver

@@ -17,9 +17,11 @@
 
 struct client_conf_st client_conf = {
     .rcvport = DEFAULT_RCVPORT,
+    .ifname = DEFAULT_IF,
     .mgroup = DEFAULT_MGROUP,
     .player_cmd = DEFAULT_PLAYERCMD
 };
+
 
 static int pd[2];
 
@@ -55,6 +57,7 @@ static void usr1_handler(int s){}
 /*
  * -P --port   指定接收端口
  * -M --mgroup 指定多播组
+ * -I NIC name
  * -p --player 指定播放器命令行
  * -H --help   显示帮助
  */
@@ -67,6 +70,7 @@ struct option argarr[] = {
     {NULL, 0, NULL, 0},
 };
 
+<<<<<<< Updated upstream
 int main(int argc, char **argv){
     pid_t pid;
     int c, ret, index;
@@ -83,7 +87,19 @@ int main(int argc, char **argv){
 
     index = 0;
     while(1){
-        c = getopt_long(argc, argv, "P:M:p:H", argarr, &index);
+        c = getopt_long(argc, argv, "P:M:p:I:H", argarr, &index);
+=======
+
+int main(int argc, char **argv){
+    pid_t pid;
+    int c;
+    int sd;
+    struct sockaddr_in laddr;
+    int nr_arg = sizeof(argarr) / sizeof(struct option);
+
+    while(1){
+        c = getopt_long(argc, argv, "P:M:p:H", argarr, &nr_arg);
+>>>>>>> Stashed changes
         if( c < 0){
             break;
         }
@@ -93,6 +109,9 @@ int main(int argc, char **argv){
                 break;
             case 'M':
                 client_conf.mgroup = optarg;
+                break;
+            case 'I':
+                client_conf.ifname = optarg;
                 break;
             case 'p':
                 client_conf.player_cmd = optarg;
@@ -114,7 +133,7 @@ int main(int argc, char **argv){
 
     inet_pton(AF_INET, client_conf.mgroup, &mreq.imr_multiaddr);
     inet_pton(AF_INET, "0.0.0.0", &mreq.imr_address);
-    mreq.imr_ifindex = if_nametoindex("eth1");
+    mreq.imr_ifindex = if_nametoindex(client_conf.ifname);
                                 //int val = 1;
                                 //IP_MULTICAST_LOOP, &val, 4)
     if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0){

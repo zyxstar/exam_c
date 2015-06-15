@@ -104,15 +104,16 @@ int mlib_getchnlist(struct mlib_listentry_st **list, int *size){
     }
 
     snprintf(path, PATHSIZE, "%s/*", server_conf.media_dir);
-    if(glob(path, 0, NULL, &globres)){
-        return -1;
+    if(glob(path, 0, NULL, &globres) != 0){
+        return errno;
     }
 
     *list = malloc(globres.gl_pathc * sizeof(struct mlib_listentry_st));
     if(*list == NULL){
-        perror("malloc()");
+        syslog(LOG_ERR, "malloc(): %s", strerror(errno));
         exit(1);
     }
+
     num = 0;
     for(i = 0; i < globres.gl_pathc; i++){
         res = path2entry(globres.gl_pathv[i]);

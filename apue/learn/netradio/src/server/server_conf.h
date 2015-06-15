@@ -20,6 +20,6 @@ extern int serversd;
 extern struct sockaddr_in sndaddr;
 
 #define DEFAULT_MEDIADIR  "/var/media"
-#define DEFAULT_IF        "eth1"
+#define DEFAULT_IF        "eth0"
 
 #endif

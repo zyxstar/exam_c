@@ -1,6 +1,6 @@
 CC      := gcc
 CFLAGS  += -I. -I../include -g
-LDFLAGS += -lpthread
+LDFLAGS += -lpthread -pthread
 VPATH   += ../include
 
 headers = proto.h site_types.h server_conf.h

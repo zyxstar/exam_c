@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <syslog.h>
 #include <sched.h>
+#include <string.h>
 
 #include <pthread.h>
 #include <sys/socket.h>

@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <getopt.h>
 #include <errno.h>
 #include <syslog.h>
@@ -161,10 +162,10 @@ int main(int argc, char **argv){
 #endif
 
     thr_list_create(list, list_size);
-    for(i = 0; i < list_size; ++i){
-        thr_channel_create(list + i);
-        syslog(LOG_DEBUG, "thr_channel_create() %d", i);
-    }
+    // for(i = 0; i < list_size; ++i){
+    //     thr_channel_create(list + i);
+    //     syslog(LOG_DEBUG, "thr_channel_create() %d", i);
+    // }
 
     while(1) pause();
 
